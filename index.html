@@ -1,0 +1,1845 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acàcia — Plataforma Acadèmica</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0f0f1a;
+  --ink-80: #1e1e32;
+  --ink-60: #3d3d58;
+  --ink-40: #7c7c9a;
+  --ink-20: #c5c5d8;
+  --ink-10: #e8e8f0;
+  --ink-05: #f4f4f8;
+  --accent: #ff5f6d;
+  --accent-dark: #e04050;
+  --accent-light: #fff0f1;
+  --teal: #00b4a0;
+  --teal-light: #e0faf8;
+  --purple: #7c3aed;
+  --purple-light: #f5f0ff;
+  --amber: #f59e0b;
+  --amber-light: #fffbeb;
+  --blue: #3b82f6;
+  --blue-light: #eff6ff;
+  --green: #10b981;
+  --green-light: #ecfdf5;
+  --white: #ffffff;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 4px 20px rgba(15,15,26,0.08);
+  --shadow-md: 0 8px 32px rgba(15,15,26,0.12);
+  --shadow-lg: 0 16px 48px rgba(15,15,26,0.18);
+  --sidebar-w: 240px;
+  --font: 'Outfit', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--ink-05);color:var(--ink);min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--ink-20);border-radius:99px}
+.hidden{display:none!important}
+
+/* ═══ LOGIN ═══ */
+#loginScreen{
+  position:fixed;inset:0;
+  background:linear-gradient(135deg,var(--ink) 0%,#1a1a3e 50%,#0f2027 100%);
+  display:flex;align-items:center;justify-content:center;z-index:9999;
+  overflow:hidden;
+}
+#loginScreen::before{content:'';position:absolute;top:-40%;right:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(255,95,109,0.18) 0%,transparent 70%);border-radius:50%}
+#loginScreen::after{content:'';position:absolute;bottom:-30%;left:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(0,180,160,0.12) 0%,transparent 70%);border-radius:50%}
+
+.login-card{
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+  backdrop-filter:blur(20px);border-radius:24px;padding:48px 40px;
+  width:100%;max-width:420px;box-shadow:var(--shadow-lg);
+  position:relative;z-index:1;animation:slideUp 0.5s ease;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+
+.login-logo{display:flex;flex-direction:column;align-items:center;margin-bottom:24px}
+.logo-icon{font-size:52px;animation:float 3s ease-in-out infinite;line-height:1}
+.login-brand{color:#fff;font-size:28px;font-weight:800;letter-spacing:-0.5px;margin-top:8px}
+.login-brand span{color:var(--accent)}
+.login-sub{color:rgba(255,255,255,0.45);font-size:13px;text-align:center;margin-bottom:32px;line-height:1.5}
+.login-form{display:flex;flex-direction:column;gap:10px}
+
+.field-wrap{position:relative}
+.field-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;color:rgba(255,255,255,0.35);pointer-events:none}
+.login-input{
+  background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);
+  border-radius:var(--radius-sm);color:#fff;padding:14px 16px 14px 42px;
+  font-size:14px;font-family:var(--font);transition:all 0.2s;outline:none;width:100%;
+}
+.login-input::placeholder{color:rgba(255,255,255,0.3)}
+.login-input:focus{border-color:var(--accent);background:rgba(255,255,255,0.1);box-shadow:0 0 0 3px rgba(255,95,109,0.15)}
+
+.btn-primary{
+  background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);
+  padding:14px 20px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;
+  transition:all 0.2s;display:inline-flex;align-items:center;justify-content:center;gap:6px;width:100%;
+}
+.btn-primary:hover{background:var(--accent-dark);transform:translateY(-1px);box-shadow:0 4px 16px rgba(255,95,109,0.4)}
+.btn-primary:active{transform:translateY(0)}
+
+.login-divider{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,0.25);font-size:12px;margin:4px 0}
+.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.1)}
+
+.btn-google{
+  background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.85);
+  border:1px solid rgba(255,255,255,0.15);border-radius:var(--radius-sm);
+  padding:13px 20px;font-family:var(--font);font-size:14px;font-weight:600;
+  cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;
+}
+.btn-google:hover{background:rgba(255,255,255,0.14)}
+.google-g{width:18px;height:18px;display:block}
+
+.login-footer{text-align:center;margin-top:20px}
+.login-footer a{color:rgba(255,255,255,0.35);font-size:12px;cursor:pointer;text-decoration:underline;transition:color 0.2s}
+.login-footer a:hover{color:rgba(255,255,255,0.7)}
+
+/* ═══ APP LAYOUT ═══ */
+#app{display:flex;min-height:100vh}
+
+/* ═══ SIDEBAR ═══ */
+.sidebar{
+  width:var(--sidebar-w);background:var(--ink);
+  display:flex;flex-direction:column;flex-shrink:0;
+  position:fixed;top:0;left:0;bottom:0;z-index:200;
+}
+.sidebar-header{padding:22px 18px 18px;border-bottom:1px solid rgba(255,255,255,0.07)}
+.sidebar-brand{display:flex;align-items:center;gap:10px}
+.sidebar-logo-wrap{width:36px;height:36px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.sidebar-title-wrap{display:flex;flex-direction:column}
+.sidebar-title{color:#fff;font-size:17px;font-weight:800;letter-spacing:-0.3px;line-height:1}
+.sidebar-title span{color:var(--accent)}
+.sidebar-subtitle{color:rgba(255,255,255,0.3);font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.5px;margin-top:2px}
+
+.sidebar-nav{flex:1;padding:14px 10px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+.nav-section-label{font-size:10px;font-weight:700;color:rgba(255,255,255,0.22);text-transform:uppercase;letter-spacing:0.8px;padding:10px 10px 4px}
+
+.nav-item{
+  display:flex;align-items:center;gap:10px;color:rgba(255,255,255,0.48);
+  background:none;border:none;border-radius:var(--radius-sm);
+  padding:10px 10px;font-family:var(--font);font-size:13.5px;font-weight:500;
+  cursor:pointer;transition:all 0.15s;text-align:left;width:100%;
+}
+.nav-item:hover{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.85)}
+.nav-item.active{background:rgba(255,95,109,0.16);color:#fff;font-weight:600}
+.nav-item.active .nav-icon{opacity:1}
+.nav-icon{font-size:18px;opacity:0.7;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px}
+
+.sidebar-footer{padding:14px;border-top:1px solid rgba(255,255,255,0.07)}
+.user-card{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius-sm);transition:background 0.15s;cursor:pointer}
+.user-card:hover{background:rgba(255,255,255,0.05)}
+.user-avatar{width:34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.user-info-wrap{flex:1;overflow:hidden}
+.user-name{color:#fff;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.user-role{color:rgba(255,255,255,0.35);font-size:11px;margin-top:1px}
+.btn-logout{background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.3);font-size:16px;padding:4px;border-radius:5px;transition:all 0.15s}
+.btn-logout:hover{color:rgba(255,255,255,0.8);background:rgba(255,255,255,0.08)}
+
+/* ═══ MAIN ═══ */
+.main{margin-left:var(--sidebar-w);flex:1;min-height:100vh;display:flex;flex-direction:column}
+
+.top-bar{
+  background:var(--white);border-bottom:1px solid var(--ink-10);
+  padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.top-bar-left{display:flex;align-items:center;gap:12px}
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:14px}
+.breadcrumb-sep{color:var(--ink-20)}
+.breadcrumb-cur{font-weight:600;color:var(--ink)}
+.breadcrumb-link{color:var(--ink-40);cursor:pointer;transition:color 0.15s}
+.breadcrumb-link:hover{color:var(--ink)}
+
+.top-bar-right{display:flex;align-items:center;gap:8px}
+.top-search{
+  background:var(--ink-05);border:1px solid var(--ink-10);border-radius:var(--radius-sm);
+  padding:8px 14px;font-size:13px;font-family:var(--font);color:var(--ink);outline:none;width:200px;transition:all 0.2s;
+}
+.top-search:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,95,109,0.1);background:var(--white);width:240px}
+.icon-btn{background:none;border:1px solid var(--ink-10);border-radius:var(--radius-sm);padding:8px;cursor:pointer;color:var(--ink-40);font-size:16px;transition:all 0.15s;display:flex;align-items:center;justify-content:center}
+.icon-btn:hover{border-color:var(--ink-20);color:var(--ink);background:var(--ink-05)}
+.notif-dot{position:relative}
+.notif-dot::after{content:'';position:absolute;top:4px;right:4px;width:7px;height:7px;background:var(--accent);border-radius:50%;border:2px solid var(--white)}
+
+.page{padding:28px;flex:1;animation:fadeIn 0.2s ease}
+
+/* ═══ DASHBOARD ═══ */
+.page-header{margin-bottom:28px}
+.page-title{font-size:26px;font-weight:800;color:var(--ink);letter-spacing:-0.5px;line-height:1.1}
+.page-sub{color:var(--ink-40);font-size:14px;margin-top:4px}
+
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{
+  background:var(--white);border:1px solid var(--ink-10);border-radius:var(--radius);
+  padding:20px;transition:all 0.2s;cursor:default;position:relative;overflow:hidden;
+}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.stat-card:nth-child(1)::before{background:linear-gradient(90deg,var(--accent),#ff8f9d)}
+.stat-card:nth-child(2)::before{background:linear-gradient(90deg,var(--teal),#5ee7d0)}
+.stat-card:nth-child(3)::before{background:linear-gradient(90deg,var(--purple),#a78bfa)}
+.stat-card:nth-child(4)::before{background:linear-gradient(90deg,var(--amber),#fcd34d)}
+.stat-card:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+.stat-icon{font-size:24px;margin-bottom:10px}
+.stat-val{font-size:30px;font-weight:800;color:var(--ink);letter-spacing:-1px}
+.stat-label{font-size:13px;color:var(--ink-40);margin-top:2px}
+.stat-delta{font-size:12px;margin-top:6px;font-weight:600}
+.stat-delta.up{color:var(--green)}
+.stat-delta.down{color:var(--accent)}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.card{background:var(--white);border:1px solid var(--ink-10);border-radius:var(--radius);padding:20px}
+.card-title{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.card-title span{font-size:13px;font-weight:500;color:var(--ink-40)}
+
+/* Activity list */
+.activity-list{display:flex;flex-direction:column;gap:10px}
+.activity-item{display:flex;align-items:flex-start;gap:10px;padding:10px;border-radius:var(--radius-sm);transition:background 0.15s}
+.activity-item:hover{background:var(--ink-05)}
+.activity-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.activity-dot.coral{background:var(--accent)}
+.activity-dot.teal{background:var(--teal)}
+.activity-dot.purple{background:var(--purple)}
+.activity-dot.amber{background:var(--amber)}
+.activity-text{font-size:13px;color:var(--ink-60);line-height:1.5}
+.activity-text strong{color:var(--ink);font-weight:600}
+.activity-time{font-size:11px;color:var(--ink-20);margin-top:2px}
+
+/* Class list in dashboard */
+.class-list-item{
+  display:flex;align-items:center;gap:12px;padding:10px 12px;
+  border-radius:var(--radius-sm);cursor:pointer;transition:all 0.15s;
+}
+.class-list-item:hover{background:var(--ink-05)}
+.class-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.class-list-name{font-size:14px;font-weight:600;color:var(--ink);flex:1}
+.class-list-count{font-size:12px;color:var(--ink-40)}
+.class-list-badge{font-size:11px;background:var(--accent-light);color:var(--accent-dark);padding:2px 8px;border-radius:99px;font-weight:600}
+
+/* ═══ CLASSES PAGE ═══ */
+.page-actions{display:flex;align-items:center;gap:8px}
+.btn-secondary{
+  background:var(--ink-05);color:var(--ink-60);border:1px solid var(--ink-20);
+  border-radius:var(--radius-sm);padding:10px 16px;font-family:var(--font);
+  font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.btn-secondary:hover{background:var(--ink-10);color:var(--ink)}
+
+.classes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:20px}
+.class-card{
+  background:var(--white);border-radius:var(--radius);padding:22px;
+  cursor:pointer;transition:all 0.2s;border:1px solid var(--ink-10);position:relative;overflow:hidden;
+}
+.class-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px}
+.class-card:nth-child(6n+1)::before{background:linear-gradient(90deg,#ff5f6d,#ff8f9d)}
+.class-card:nth-child(6n+2)::before{background:linear-gradient(90deg,#00b4a0,#5ee7d0)}
+.class-card:nth-child(6n+3)::before{background:linear-gradient(90deg,#7c3aed,#a78bfa)}
+.class-card:nth-child(6n+4)::before{background:linear-gradient(90deg,#f59e0b,#fcd34d)}
+.class-card:nth-child(6n+5)::before{background:linear-gradient(90deg,#3b82f6,#93c5fd)}
+.class-card:nth-child(6n+6)::before{background:linear-gradient(90deg,#ec4899,#f9a8d4)}
+.class-card:hover{border-color:var(--ink-20);box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.class-card h3{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:6px}
+.class-card-meta{font-size:12px;color:var(--ink-40);display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap}
+.meta-pill{background:var(--ink-05);border-radius:99px;padding:3px 9px;font-size:11px;color:var(--ink-60)}
+.class-card-footer{margin-top:14px;padding-top:12px;border-top:1px solid var(--ink-10);display:flex;align-items:center;justify-content:space-between}
+.student-avatars{display:flex}
+.student-avatar-sm{width:22px;height:22px;border-radius:50%;background:var(--ink-20);border:2px solid var(--white);margin-left:-6px;font-size:9px;font-weight:700;color:var(--ink-60);display:flex;align-items:center;justify-content:center}
+.student-avatar-sm:first-child{margin-left:0}
+.class-card-action{font-size:12px;color:var(--accent);font-weight:600;cursor:pointer}
+
+/* ═══ CLASS DETAIL ═══ */
+.class-detail-header{margin-bottom:20px}
+.back-btn{display:inline-flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;color:var(--ink-40);font-size:13px;font-family:var(--font);padding:6px 10px;border-radius:6px;transition:all 0.15s;margin-bottom:12px}
+.back-btn:hover{color:var(--ink);background:var(--ink-05)}
+
+.periodes-bar{
+  display:flex;align-items:center;gap:6px;padding:0 20px;
+  background:var(--white);border-bottom:2px solid var(--ink-10);
+  min-height:46px;overflow-x:auto;flex-shrink:0;border-radius:var(--radius) var(--radius) 0 0;
+  margin-bottom:0;
+}
+.periodes-tabs{display:flex;gap:4px;flex:1}
+.periode-tab{
+  display:inline-flex;align-items:center;gap:6px;padding:6px 14px;
+  border-radius:6px 6px 0 0;border:1.5px solid transparent;
+  background:none;color:var(--ink-40);font-size:13px;font-weight:500;
+  cursor:pointer;white-space:nowrap;font-family:var(--font);transition:all 0.15s;margin-bottom:-2px;
+}
+.periode-tab:hover{background:var(--accent-light);color:var(--accent)}
+.periode-tab.active{background:var(--white);color:var(--accent);border-color:var(--ink-10) var(--ink-10) var(--white);font-weight:700}
+.btn-add-periode{
+  width:26px;height:26px;border-radius:50%;border:1.5px dashed var(--ink-20);
+  background:none;color:var(--ink-40);font-size:15px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all 0.15s;flex-shrink:0;
+}
+.btn-add-periode:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+
+.class-body{
+  display:flex;gap:16px;
+  background:var(--white);border:1px solid var(--ink-10);border-radius:0 0 var(--radius) var(--radius);
+  min-height:500px;
+}
+
+/* Students panel */
+.students-panel{
+  width:280px;flex-shrink:0;border-right:1px solid var(--ink-10);
+  display:flex;flex-direction:column;padding:16px;
+}
+.panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.panel-title{font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:6px}
+.count-badge{background:var(--ink-10);color:var(--ink-60);font-size:11px;padding:2px 7px;border-radius:99px;font-weight:600}
+.search-input{
+  width:100%;padding:8px 12px;border:1px solid var(--ink-10);border-radius:var(--radius-sm);
+  font-size:13px;font-family:var(--font);background:var(--ink-05);color:var(--ink);
+  outline:none;transition:all 0.2s;margin-bottom:10px;
+}
+.search-input:focus{border-color:var(--accent);background:var(--white);box-shadow:0 0 0 3px rgba(255,95,109,0.1)}
+
+.students-list{list-style:none;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:2px}
+.student-item{
+  display:flex;align-items:center;padding:8px 10px;border-radius:var(--radius-sm);
+  cursor:pointer;transition:all 0.15s;gap:8px;
+}
+.student-item:hover{background:var(--ink-05)}
+.student-item.active{background:var(--accent-light)}
+.student-item.active .student-name{color:var(--accent-dark);font-weight:600}
+.student-avatar-xs{width:26px;height:26px;border-radius:50%;background:var(--ink-10);font-size:10px;font-weight:700;color:var(--ink-60);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.student-item.active .student-avatar-xs{background:var(--accent-light);color:var(--accent-dark)}
+.student-name{font-size:13px;color:var(--ink);flex:1}
+.comment-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);flex-shrink:0}
+
+/* Comments panel */
+.comments-panel{flex:1;display:flex;flex-direction:column;padding:20px;overflow-y:auto}
+.comments-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--ink-40);text-align:center;padding:40px}
+.comments-empty-icon{font-size:48px;margin-bottom:16px;opacity:0.4}
+.comment-card{background:var(--ink-05);border:1px solid var(--ink-10);border-radius:var(--radius);padding:18px;margin-bottom:12px}
+.comment-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.comment-student{font-size:15px;font-weight:700;color:var(--ink)}
+.comment-actions{display:flex;gap:6px}
+.btn-icon-sm{background:none;border:1px solid var(--ink-10);border-radius:6px;padding:5px 8px;font-size:14px;cursor:pointer;color:var(--ink-40);transition:all 0.15s}
+.btn-icon-sm:hover{background:var(--ink-10);color:var(--ink)}
+.comment-body{background:var(--white);border:1px solid var(--ink-10);border-radius:var(--radius-sm);padding:12px;min-height:60px;font-size:13.5px;color:var(--ink-60);line-height:1.6}
+.comment-body.empty-text{color:var(--ink-20);font-style:italic}
+.comment-tags{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.tag{font-size:11px;padding:3px 9px;border-radius:99px;font-weight:600}
+.tag-teal{background:var(--teal-light);color:#007a6e}
+.tag-purple{background:var(--purple-light);color:#5b21b6}
+.tag-amber{background:var(--amber-light);color:#92400e}
+.tag-blue{background:var(--blue-light);color:#1d4ed8}
+
+/* ═══ ALUMNAT PAGE ═══ */
+.table-wrap{background:var(--white);border:1px solid var(--ink-10);border-radius:var(--radius);overflow:hidden;margin-top:16px}
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{padding:12px 16px;text-align:left;font-size:12px;font-weight:700;color:var(--ink-40);text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid var(--ink-10);background:var(--ink-05)}
+.data-table td{padding:12px 16px;font-size:13.5px;color:var(--ink-60);border-bottom:1px solid var(--ink-05);transition:background 0.1s}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:var(--ink-05)}
+.student-cell{display:flex;align-items:center;gap:10px}
+.student-avatar-md{width:32px;height:32px;border-radius:50%;background:var(--ink-10);font-size:12px;font-weight:700;color:var(--ink-60);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.student-full-name{font-weight:600;color:var(--ink)}
+.status-badge{font-size:11px;padding:3px 10px;border-radius:99px;font-weight:600;white-space:nowrap}
+.status-ok{background:var(--green-light);color:#065f46}
+.status-warn{background:var(--amber-light);color:#92400e}
+.status-alert{background:var(--accent-light);color:var(--accent-dark)}
+
+/* ═══ MISSATGERIA ═══ */
+.messages-layout{display:grid;grid-template-columns:280px 1fr;gap:0;background:var(--white);border:1px solid var(--ink-10);border-radius:var(--radius);height:600px;overflow:hidden;margin-top:16px}
+.msg-list{border-right:1px solid var(--ink-10);display:flex;flex-direction:column;overflow:hidden}
+.msg-list-header{padding:14px 16px;border-bottom:1px solid var(--ink-10);display:flex;align-items:center;justify-content:space-between}
+.msg-list-title{font-size:14px;font-weight:700;color:var(--ink)}
+.msg-list-body{flex:1;overflow-y:auto}
+.msg-item{padding:12px 16px;cursor:pointer;transition:background 0.15s;border-bottom:1px solid var(--ink-05)}
+.msg-item:hover{background:var(--ink-05)}
+.msg-item.active{background:var(--accent-light)}
+.msg-item-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.msg-sender{font-size:13px;font-weight:700;color:var(--ink)}
+.msg-time{font-size:11px;color:var(--ink-20)}
+.msg-preview{font-size:12px;color:var(--ink-40);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg-unread .msg-sender{color:var(--accent-dark)}
+.msg-unread-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block;margin-right:6px}
+.msg-pane{display:flex;flex-direction:column}
+.msg-pane-header{padding:16px 20px;border-bottom:1px solid var(--ink-10);display:flex;align-items:center;gap:12px}
+.msg-pane-avatar{width:38px;height:38px;border-radius:50%;background:var(--accent-light);color:var(--accent-dark);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.msg-pane-name{font-weight:700;color:var(--ink);font-size:14px}
+.msg-pane-sub{font-size:12px;color:var(--ink-40)}
+.msg-pane-body{flex:1;padding:16px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+.msg-bubble{max-width:70%;padding:10px 14px;border-radius:12px;font-size:13.5px;line-height:1.5}
+.msg-bubble.recv{background:var(--ink-05);color:var(--ink-60);align-self:flex-start;border-bottom-left-radius:4px}
+.msg-bubble.sent{background:var(--accent);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.msg-bubble-time{font-size:10px;opacity:0.6;margin-top:4px}
+.msg-pane-footer{padding:12px 16px;border-top:1px solid var(--ink-10);display:flex;gap:8px;align-items:center}
+.msg-input{flex:1;border:1px solid var(--ink-10);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;font-family:var(--font);color:var(--ink);outline:none;transition:all 0.2s;background:var(--ink-05)}
+.msg-input:focus{border-color:var(--accent);background:var(--white)}
+
+/* ═══ CALENDARI ═══ */
+.calendar-wrap{background:var(--white);border:1px solid var(--ink-10);border-radius:var(--radius);overflow:hidden;margin-top:16px}
+.cal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--ink-10)}
+.cal-nav{display:flex;align-items:center;gap:8px}
+.cal-month{font-size:16px;font-weight:700;color:var(--ink)}
+.cal-btn{background:none;border:1px solid var(--ink-10);border-radius:6px;padding:6px 10px;cursor:pointer;color:var(--ink-40);transition:all 0.15s;font-size:14px}
+.cal-btn:hover{border-color:var(--ink-20);color:var(--ink)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.cal-day-label{text-align:center;padding:10px 0 6px;font-size:11px;font-weight:700;color:var(--ink-40);text-transform:uppercase;letter-spacing:0.5px}
+.cal-day{min-height:80px;padding:6px;border-top:1px solid var(--ink-05);border-right:1px solid var(--ink-05);cursor:pointer;transition:background 0.1s}
+.cal-day:hover{background:var(--ink-05)}
+.cal-day.today .cal-day-num{background:var(--accent);color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center}
+.cal-day.other-month .cal-day-num{color:var(--ink-20)}
+.cal-day-num{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px;width:24px;height:24px;display:flex;align-items:center;justify-content:center}
+.cal-event{font-size:10px;padding:2px 6px;border-radius:4px;margin-bottom:2px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cal-event.coral{background:var(--accent-light);color:var(--accent-dark)}
+.cal-event.teal{background:var(--teal-light);color:#007a6e}
+.cal-event.purple{background:var(--purple-light);color:#5b21b6}
+.cal-event.amber{background:var(--amber-light);color:#92400e}
+
+/* ═══ PAGAMENTS ═══ */
+.payment-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;margin-top:16px}
+.payment-stat{background:var(--white);border:1px solid var(--ink-10);border-radius:var(--radius);padding:18px}
+.payment-stat-label{font-size:12px;color:var(--ink-40);font-weight:600;margin-bottom:6px}
+.payment-stat-val{font-size:26px;font-weight:800;color:var(--ink);letter-spacing:-1px}
+.payment-stat-sub{font-size:12px;margin-top:4px}
+
+/* ═══ INDICADORS ═══ */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:16px;margin-bottom:20px}
+.kpi-card{background:var(--white);border:1px solid var(--ink-10);border-radius:var(--radius);padding:18px}
+.kpi-label{font-size:12px;color:var(--ink-40);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.4px}
+.kpi-val{font-size:32px;font-weight:800;letter-spacing:-1px}
+.kpi-bar{height:6px;background:var(--ink-10);border-radius:99px;margin-top:10px;overflow:hidden}
+.kpi-bar-fill{height:100%;border-radius:99px;transition:width 0.6s ease}
+.kpi-note{font-size:12px;color:var(--ink-40);margin-top:8px}
+
+/* ═══ MODALS ═══ */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(15,15,26,0.5);backdrop-filter:blur(4px);
+  z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;animation:fadeIn 0.15s ease;
+}
+.modal-box{background:var(--white);border-radius:var(--radius);padding:28px;width:100%;max-width:460px;box-shadow:var(--shadow-lg);animation:slideUp 0.2s ease}
+.modal-title{font-size:17px;font-weight:700;color:var(--ink);margin-bottom:20px;display:flex;align-items:center;justify-content:space-between}
+.modal-close{background:none;border:none;cursor:pointer;color:var(--ink-40);font-size:18px;padding:4px;border-radius:6px;transition:all 0.15s}
+.modal-close:hover{background:var(--ink-05);color:var(--ink)}
+.modal-input{width:100%;border:1px solid var(--ink-20);border-radius:var(--radius-sm);padding:11px 14px;font-size:14px;font-family:var(--font);color:var(--ink);outline:none;transition:all 0.2s;margin-bottom:12px}
+.modal-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,95,109,0.1)}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}
+.form-label{font-size:12px;font-weight:600;color:var(--ink-60);margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:0.4px}
+
+/* ═══ NOTIFICATIONS PANEL ═══ */
+.notif-panel{
+  position:fixed;top:60px;right:16px;width:340px;background:var(--white);
+  border:1px solid var(--ink-10);border-radius:var(--radius);box-shadow:var(--shadow-lg);
+  z-index:500;animation:slideUp 0.2s ease;
+}
+.notif-header{padding:14px 16px;border-bottom:1px solid var(--ink-10);display:flex;align-items:center;justify-content:space-between}
+.notif-title{font-size:14px;font-weight:700;color:var(--ink)}
+.notif-mark{font-size:12px;color:var(--accent);cursor:pointer;font-weight:600}
+.notif-list{max-height:400px;overflow-y:auto}
+.notif-item{padding:12px 16px;border-bottom:1px solid var(--ink-05);cursor:pointer;transition:background 0.15s}
+.notif-item:hover{background:var(--ink-05)}
+.notif-item.unread{background:var(--accent-light)}
+.notif-item-top{display:flex;align-items:flex-start;gap:10px}
+.notif-icon{font-size:20px;flex-shrink:0;margin-top:2px}
+.notif-text{font-size:13px;color:var(--ink-60);line-height:1.5}
+.notif-text strong{color:var(--ink)}
+.notif-time{font-size:11px;color:var(--ink-20);margin-top:4px}
+
+/* ═══ SETTINGS PAGE ═══ */
+.settings-grid{display:grid;grid-template-columns:200px 1fr;gap:20px;margin-top:16px}
+.settings-nav{display:flex;flex-direction:column;gap:2px}
+.settings-nav-item{padding:9px 12px;border-radius:var(--radius-sm);font-size:13.5px;color:var(--ink-60);cursor:pointer;transition:all 0.15s}
+.settings-nav-item:hover{background:var(--ink-05);color:var(--ink)}
+.settings-nav-item.active{background:var(--accent-light);color:var(--accent-dark);font-weight:600}
+.settings-pane{background:var(--white);border:1px solid var(--ink-10);border-radius:var(--radius);padding:24px}
+.settings-section{margin-bottom:28px}
+.settings-section:last-child{margin-bottom:0}
+.settings-section-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--ink-10)}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--ink-05)}
+.settings-row:last-child{border-bottom:none}
+.settings-row-label{font-size:14px;color:var(--ink);font-weight:500}
+.settings-row-sub{font-size:12px;color:var(--ink-40);margin-top:2px}
+.toggle{width:40px;height:22px;border-radius:99px;background:var(--ink-20);border:none;cursor:pointer;position:relative;transition:background 0.2s;flex-shrink:0}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--white);transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+.toggle.on{background:var(--accent)}
+.toggle.on::after{transform:translateX(18px)}
+
+/* ═══ MISC ═══ */
+.spinner{width:28px;height:28px;border:3px solid var(--ink-10);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite}
+.flex{display:flex}
+.items-center{align-items:center}
+.gap-8{gap:8px}
+.mt-4{margin-top:4px}
+.page-title-row{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px}
+.color-accent{color:var(--accent)}
+.color-teal{color:var(--teal)}
+.color-purple{color:var(--purple)}
+.color-green{color:var(--green)}
+.select-input{border:1px solid var(--ink-20);border-radius:var(--radius-sm);padding:10px 14px;font-family:var(--font);font-size:13px;color:var(--ink);outline:none;background:var(--white);cursor:pointer;transition:border-color 0.2s}
+.select-input:focus{border-color:var(--accent)}
+
+/* Tabs generics */
+.tabs{display:flex;gap:4px;background:var(--ink-05);border-radius:var(--radius-sm);padding:4px;margin-bottom:20px;width:fit-content}
+.tab{padding:7px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink-40);background:none;border:none;font-family:var(--font);transition:all 0.15s}
+.tab:hover{color:var(--ink)}
+.tab.active{background:var(--white);color:var(--ink);box-shadow:0 1px 4px rgba(15,15,26,0.1)}
+
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);transition:transform 0.3s ease}
+  .sidebar.open{transform:translateX(0);box-shadow:var(--shadow-lg)}
+  .main{margin-left:0}
+  .grid-2,.grid-3{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .messages-layout{grid-template-columns:1fr}
+  .settings-grid{grid-template-columns:1fr}
+  .class-body{flex-direction:column}
+  .students-panel{width:100%;border-right:none;border-bottom:1px solid var(--ink-10)}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-icon">🌿</div>
+      <div class="login-brand">Acà<span>cia</span></div>
+    </div>
+    <p class="login-sub">Control Acadèmic, Comunicació i Administració<br>Institut Can Batlló · Barcelona</p>
+    <div class="login-form">
+      <div class="field-wrap">
+        <span class="field-icon">✉</span>
+        <input class="login-input" type="email" placeholder="Correu electrònic" id="loginEmail">
+      </div>
+      <div class="field-wrap">
+        <span class="field-icon">🔒</span>
+        <input class="login-input" type="password" placeholder="Contrasenya" id="loginPass">
+      </div>
+      <button class="btn-primary" onclick="doLogin()">Entra a l'aplicació</button>
+      <div class="login-divider">o</div>
+      <button class="btn-google" onclick="doLogin()">
+        <svg class="google-g" viewBox="0 0 18 18" fill="none"><path d="M17.64 9.2a10.34 10.34 0 0 0-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92a8.78 8.78 0 0 0 2.68-6.62z" fill="#4285F4"/><path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.26a5.4 5.4 0 0 1-8.05-2.84H.96v2.33A9 9 0 0 0 9 18z" fill="#34A853"/><path d="M3.99 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.03-2.33z" fill="#FBBC05"/><path d="M9 3.58a4.86 4.86 0 0 1 3.44 1.35l2.58-2.58A8.64 8.64 0 0 0 9 0 9 9 0 0 0 .96 4.95L4 7.28A5.37 5.37 0 0 1 9 3.58z" fill="#EA4335"/></svg>
+        Inicia sessió amb Google
+      </button>
+    </div>
+    <div class="login-footer">
+      <a onclick="showModal('legalModal')">Avís Legal · Política de Privacitat</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div id="app" class="hidden">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">
+        <div class="sidebar-logo-wrap">🌿</div>
+        <div class="sidebar-title-wrap">
+          <div class="sidebar-title">Acà<span>cia</span></div>
+          <div class="sidebar-subtitle">Institut Can Batlló</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-nav">
+      <div class="nav-section-label">General</div>
+      <button class="nav-item active" onclick="showPage('dashboard',this)">
+        <span class="nav-icon">🏠</span> Inici
+      </button>
+      <button class="nav-item" onclick="showPage('classes',this)">
+        <span class="nav-icon">📚</span> Classes
+      </button>
+      <button class="nav-item" onclick="showPage('alumnat',this)">
+        <span class="nav-icon">👥</span> Alumnat
+      </button>
+      <button class="nav-item" onclick="showPage('missatgeria',this)">
+        <span class="nav-icon">✉️</span> Missatgeria
+        <span class="nav-badge">3</span>
+      </button>
+
+      <div class="nav-section-label">Organització</div>
+      <button class="nav-item" onclick="showPage('calendari',this)">
+        <span class="nav-icon">📅</span> Calendari
+      </button>
+      <button class="nav-item" onclick="showPage('sortides',this)">
+        <span class="nav-icon">🚌</span> Sortides
+      </button>
+      <button class="nav-item" onclick="showPage('avaluacions',this)">
+        <span class="nav-icon">📊</span> Avaluacions
+      </button>
+
+      <div class="nav-section-label">Administració</div>
+      <button class="nav-item" onclick="showPage('pagaments',this)">
+        <span class="nav-icon">💳</span> Pagaments
+      </button>
+      <button class="nav-item" onclick="showPage('indicadors',this)">
+        <span class="nav-icon">📈</span> Indicadors
+      </button>
+      <button class="nav-item" onclick="showPage('espais',this)">
+        <span class="nav-icon">🏫</span> Espais
+      </button>
+      <button class="nav-item" onclick="showPage('configuracio',this)">
+        <span class="nav-icon">⚙️</span> Configuració
+      </button>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-card" onclick="showPage('configuracio',null)">
+        <div class="user-avatar" id="userAvatar">MP</div>
+        <div class="user-info-wrap">
+          <div class="user-name" id="userName">Maria Puig</div>
+          <div class="user-role">Tutora · 2n ESO B</div>
+        </div>
+        <button class="btn-logout" onclick="event.stopPropagation();doLogout()" title="Tanca sessió">↩</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <div class="breadcrumb" id="breadcrumb">
+          <span class="breadcrumb-cur">Inici</span>
+        </div>
+      </div>
+      <div class="top-bar-right">
+        <input class="top-search" type="text" placeholder="🔍  Cerca alumne, classe...">
+        <button class="icon-btn notif-dot" onclick="toggleNotifs()" id="notifBtn" title="Notificacions">🔔</button>
+        <button class="icon-btn" onclick="toggleHelp()" title="Ajuda">❓</button>
+      </div>
+    </div>
+
+    <!-- PAGES -->
+    <div id="pageDashboard" class="page">
+      <div class="page-title-row">
+        <div>
+          <div class="page-title">Bon dia, Maria 👋</div>
+          <div class="page-sub">Dimecres, 14 de maig de 2025 · Curs 2024-2025</div>
+        </div>
+        <button class="btn-primary" onclick="showPage('classes',null)">Veure les classes →</button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div class="stat-val">134</div>
+          <div class="stat-label">Alumnes actius</div>
+          <div class="stat-delta up">↑ 3 nous aquest mes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📚</div>
+          <div class="stat-val">6</div>
+          <div class="stat-label">Classes assignades</div>
+          <div class="stat-delta">3r i 4t ESO + Batxillerat</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">✉️</div>
+          <div class="stat-val">12</div>
+          <div class="stat-label">Missatges pendents</div>
+          <div class="stat-delta up">3 nous avui</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">💳</div>
+          <div class="stat-val">87%</div>
+          <div class="stat-label">Pagaments al dia</div>
+          <div class="stat-delta down">↓ 4 pendents</div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Les meves classes <span onclick="showPage('classes',null)" style="cursor:pointer;color:var(--accent)">Veure-les totes →</span></div>
+          <div class="class-list-item" onclick="openClass('2ESO-B')">
+            <div class="class-dot" style="background:var(--accent)"></div>
+            <span class="class-list-name">2n ESO B</span>
+            <span class="class-list-count">28 alumnes</span>
+            <span class="class-list-badge">Tutoria</span>
+          </div>
+          <div class="class-list-item" onclick="openClass('3ESO-A')">
+            <div class="class-dot" style="background:var(--teal)"></div>
+            <span class="class-list-name">3r ESO A</span>
+            <span class="class-list-count">25 alumnes</span>
+          </div>
+          <div class="class-list-item" onclick="openClass('3ESO-B')">
+            <div class="class-dot" style="background:var(--purple)"></div>
+            <span class="class-list-name">3r ESO B</span>
+            <span class="class-list-count">26 alumnes</span>
+          </div>
+          <div class="class-list-item" onclick="openClass('4ESO-A')">
+            <div class="class-dot" style="background:var(--amber)"></div>
+            <span class="class-list-name">4t ESO A</span>
+            <span class="class-list-count">24 alumnes</span>
+          </div>
+          <div class="class-list-item" onclick="openClass('1BAT-A')">
+            <div class="class-dot" style="background:var(--blue)"></div>
+            <span class="class-list-name">1r Batxillerat A</span>
+            <span class="class-list-count">22 alumnes</span>
+          </div>
+          <div class="class-list-item" onclick="openClass('2BAT-B')">
+            <div class="class-dot" style="background:#ec4899"></div>
+            <span class="class-list-name">2n Batxillerat B</span>
+            <span class="class-list-count">19 alumnes</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Activitat recent</div>
+          <div class="activity-list">
+            <div class="activity-item">
+              <div class="activity-dot coral"></div>
+              <div>
+                <div class="activity-text"><strong>Marc Rodríguez</strong> ha enviat un missatge a tutoria</div>
+                <div class="activity-time">Fa 12 minuts</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot teal"></div>
+              <div>
+                <div class="activity-text">Nou pagament confirmat: <strong>Anna García</strong> (sortida al teatre)</div>
+                <div class="activity-time">Fa 1 hora</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot purple"></div>
+              <div>
+                <div class="activity-text"><strong>Carla Martí</strong> ha lliurat l'expedient actualitzat</div>
+                <div class="activity-time">Fa 2 hores</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot amber"></div>
+              <div>
+                <div class="activity-text">Recordatori: reunió de pares <strong>3r ESO B</strong> demà a les 18h</div>
+                <div class="activity-time">Ahir, 16:30</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot coral"></div>
+              <div>
+                <div class="activity-text">Comentari de tutoria guardat per a <strong>6 alumnes</strong></div>
+                <div class="activity-time">Ahir, 11:00</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLASSES PAGE -->
+    <div id="pageClasses" class="page hidden">
+      <div class="page-title-row">
+        <div>
+          <div class="page-title">Classes</div>
+          <div class="page-sub">Gestiona les teves classes i alumnes</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn-secondary" onclick="showModal('importModal')">⬆ Importar</button>
+          <button class="btn-primary" onclick="showModal('newClassModal')">+ Nova classe</button>
+        </div>
+      </div>
+      <div class="classes-grid" id="classesGrid">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+    <!-- CLASS DETAIL -->
+    <div id="pageClassDetail" class="page hidden">
+      <div class="class-detail-header">
+        <button class="back-btn" onclick="showPage('classes',null)">← Totes les classes</button>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+          <div>
+            <div class="page-title" id="classDetailTitle">2n ESO B</div>
+            <div class="page-sub" id="classDetailSub">28 alumnes · Tutoria</div>
+          </div>
+          <div class="page-actions">
+            <button class="btn-secondary" onclick="showModal('addStudentModal')">+ Alumne</button>
+            <button class="btn-secondary">⬇ Exportar PDF</button>
+            <button class="btn-primary">💬 Generar informe IA</button>
+          </div>
+        </div>
+      </div>
+      <div class="periodes-bar">
+        <div class="periodes-tabs" id="periodesTabs">
+          <button class="periode-tab active" onclick="selectTab(this)">1r Trimestre</button>
+          <button class="periode-tab" onclick="selectTab(this)">2n Trimestre</button>
+          <button class="periode-tab" onclick="selectTab(this)">3r Trimestre</button>
+          <button class="periode-tab" onclick="selectTab(this)">Projecte Final</button>
+        </div>
+        <button class="btn-add-periode" onclick="addPeriode()" title="Afegir període">+</button>
+      </div>
+      <div class="class-body">
+        <div class="students-panel">
+          <div class="panel-header">
+            <span class="panel-title">Alumnes <span class="count-badge" id="studentCount">28</span></span>
+            <button class="btn-icon-sm" onclick="showModal('addStudentModal')" title="Afegir alumne">+</button>
+          </div>
+          <input class="search-input" type="text" placeholder="Cercar alumne..." oninput="filterStudents(this.value)">
+          <ul class="students-list" id="studentsList"></ul>
+        </div>
+        <div class="comments-panel" id="commentsPanel">
+          <div class="comments-empty">
+            <div class="comments-empty-icon">💬</div>
+            <h3 style="font-size:17px;font-weight:700;color:var(--ink-40);margin-bottom:8px">Selecciona un alumne</h3>
+            <p style="font-size:14px;color:var(--ink-20)">Fes clic a un alumne per veure o editar el seu comentari</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALUMNAT PAGE -->
+    <div id="pageAlumnat" class="page hidden">
+      <div class="page-title-row">
+        <div>
+          <div class="page-title">Alumnat</div>
+          <div class="page-sub">Fitxes i expedients de tots els alumnes</div>
+        </div>
+        <div class="page-actions">
+          <select class="select-input" onchange="filterByClass(this.value)">
+            <option value="">Totes les classes</option>
+            <option>2n ESO B</option>
+            <option>3r ESO A</option>
+            <option>3r ESO B</option>
+            <option>4t ESO A</option>
+            <option>1r Batxillerat A</option>
+            <option>2n Batxillerat B</option>
+          </select>
+          <button class="btn-primary" onclick="showModal('addStudentModal')">+ Nou alumne</button>
+        </div>
+      </div>
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab(this,'tabAll')">Tots (134)</button>
+        <button class="tab" onclick="switchTab(this,'tabOk')">Sense incidències</button>
+        <button class="tab" onclick="switchTab(this,'tabAlert')">Amb alerta</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Alumne/a</th>
+              <th>Classe</th>
+              <th>Curs</th>
+              <th>Correu família</th>
+              <th>Estat pagaments</th>
+              <th>Accions</th>
+            </tr>
+          </thead>
+          <tbody id="alumnatBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MISSATGERIA PAGE -->
+    <div id="pageMissatgeria" class="page hidden">
+      <div class="page-title-row">
+        <div>
+          <div class="page-title">Missatgeria</div>
+          <div class="page-sub">Comunicació amb famílies i companys</div>
+        </div>
+        <button class="btn-primary" onclick="showModal('newMsgModal')">✏ Nou missatge</button>
+      </div>
+      <div class="messages-layout">
+        <div class="msg-list">
+          <div class="msg-list-header">
+            <span class="msg-list-title">Bandeja d'entrada</span>
+            <span style="font-size:12px;color:var(--accent);font-weight:600">3 no llegits</span>
+          </div>
+          <div class="msg-list-body" id="msgListBody"></div>
+        </div>
+        <div class="msg-pane" id="msgPane">
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--ink-20);font-size:14px">
+            Selecciona un missatge per llegir-lo
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDARI PAGE -->
+    <div id="pageCalendari" class="page hidden">
+      <div class="page-title-row">
+        <div>
+          <div class="page-title">Calendari</div>
+          <div class="page-sub">Esdeveniments, reunions i dates clau</div>
+        </div>
+        <button class="btn-primary" onclick="showModal('newEventModal')">+ Nou event</button>
+      </div>
+      <div class="calendar-wrap">
+        <div class="cal-header">
+          <div class="cal-nav">
+            <button class="cal-btn" onclick="changeMonth(-1)">‹</button>
+            <span class="cal-month" id="calMonthLabel">Maig 2025</span>
+            <button class="cal-btn" onclick="changeMonth(1)">›</button>
+          </div>
+          <div class="page-actions">
+            <button class="btn-secondary">Setmana</button>
+            <button class="btn-secondary">Mes</button>
+          </div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+    </div>
+
+    <!-- SORTIDES PAGE -->
+    <div id="pageSortides" class="page hidden">
+      <div class="page-title-row">
+        <div>
+          <div class="page-title">Sortides</div>
+          <div class="page-sub">Gestió d'activitats fora del centre</div>
+        </div>
+        <button class="btn-primary" onclick="showModal('newSortidaModal')">+ Nova sortida</button>
+      </div>
+      <div class="grid-2" style="margin-top:0">
+        <div class="card">
+          <div class="card-title">Properes sortides</div>
+          <div class="activity-list">
+            <div class="activity-item" style="background:var(--teal-light);border-radius:8px">
+              <div class="activity-dot teal"></div>
+              <div style="flex:1">
+                <div class="activity-text" style="font-weight:700;color:var(--ink)">Teatre Nacional de Catalunya</div>
+                <div class="activity-text" style="font-size:12px">4t ESO A + B · 22 maig 2025 · 15€/alumne</div>
+                <div style="display:flex;gap:6px;margin-top:6px"><span class="status-badge status-ok">28 confirmats</span><span class="status-badge status-warn">3 pendents</span></div>
+              </div>
+            </div>
+            <div class="activity-item" style="background:var(--purple-light);border-radius:8px">
+              <div class="activity-dot purple"></div>
+              <div style="flex:1">
+                <div class="activity-text" style="font-weight:700;color:var(--ink)">Museu de Ciències Naturals</div>
+                <div class="activity-text" style="font-size:12px">3r ESO B · 5 juny 2025 · 8€/alumne</div>
+                <div style="display:flex;gap:6px;margin-top:6px"><span class="status-badge status-ok">22 confirmats</span><span class="status-badge status-alert">4 pendents</span></div>
+              </div>
+            </div>
+            <div class="activity-item" style="background:var(--amber-light);border-radius:8px">
+              <div class="activity-dot amber"></div>
+              <div style="flex:1">
+                <div class="activity-text" style="font-weight:700;color:var(--ink)">Colònies fi de curs</div>
+                <div class="activity-text" style="font-size:12px">2n ESO B · 18-20 juny 2025 · 120€/alumne</div>
+                <div style="display:flex;gap:6px;margin-top:6px"><span class="status-badge status-ok">20 confirmats</span><span class="status-badge status-alert">8 pendents</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Historial</div>
+          <div class="activity-list">
+            <div class="activity-item"><div class="activity-dot teal"></div><div><div class="activity-text"><strong>Fira del Llibre</strong> · 3r ESO A</div><div class="activity-time">23 abril 2025 · 28/28 alumnes</div></div></div>
+            <div class="activity-item"><div class="activity-dot coral"></div><div><div class="activity-text"><strong>Visita parlament</strong> · 4t ESO B</div><div class="activity-time">10 abril 2025 · 25/26 alumnes</div></div></div>
+            <div class="activity-item"><div class="activity-dot purple"></div><div><div class="activity-text"><strong>Planetari</strong> · 2n ESO B</div><div class="activity-time">5 març 2025 · 27/28 alumnes</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AVALUACIONS PAGE -->
+    <div id="pageAvaluacions" class="page hidden">
+      <div class="page-title-row">
+        <div>
+          <div class="page-title">Avaluacions</div>
+          <div class="page-sub">Gestió de notes i qualificacions</div>
+        </div>
+        <div class="page-actions">
+          <select class="select-input"><option>2n ESO B</option><option>3r ESO A</option><option>4t ESO A</option></select>
+          <select class="select-input"><option>1r Trimestre</option><option>2n Trimestre</option><option>3r Trimestre</option></select>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Alumne/a</th><th>CA1</th><th>CA2</th><th>CA3</th><th>Actitud</th><th>Nota final</th><th>Estat</th></tr></thead>
+          <tbody id="avaluacionsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PAGAMENTS PAGE -->
+    <div id="pagePagaments" class="page hidden">
+      <div class="page-title-row">
+        <div>
+          <div class="page-title">Pagaments</div>
+          <div class="page-sub">Control econòmic i quotes</div>
+        </div>
+        <button class="btn-primary">+ Nova quota</button>
+      </div>
+      <div class="payment-stats">
+        <div class="payment-stat">
+          <div class="payment-stat-label">Total recaptat</div>
+          <div class="payment-stat-val" style="color:var(--green)">4.820€</div>
+          <div class="payment-stat-sub" style="color:var(--green)">↑ 87% dels alumnes</div>
+        </div>
+        <div class="payment-stat">
+          <div class="payment-stat-label">Pendent</div>
+          <div class="payment-stat-val" style="color:var(--amber)">720€</div>
+          <div class="payment-stat-sub" style="color:var(--amber)">13 alumnes · 4 quotes</div>
+        </div>
+        <div class="payment-stat">
+          <div class="payment-stat-label">Vençut</div>
+          <div class="payment-stat-val" style="color:var(--accent)">180€</div>
+          <div class="payment-stat-sub" style="color:var(--accent)">3 alumnes · recordatoris pendents</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Alumne/a</th><th>Quota</th><th>Import</th><th>Venciment</th><th>Estat</th><th>Accions</th></tr></thead>
+          <tbody id="pagamentsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- INDICADORS PAGE -->
+    <div id="pageIndicadors" class="page hidden">
+      <div class="page-title-row">
+        <div>
+          <div class="page-title">Indicadors</div>
+          <div class="page-sub">Estadístiques i seguiment del centre</div>
+        </div>
+        <button class="btn-secondary">⬇ Exportar informe</button>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Taxa d'assistència</div>
+          <div class="kpi-val" style="color:var(--green)">94.2%</div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:94%;background:var(--green)"></div></div>
+          <div class="kpi-note">↑ 1.2% respecte al mes passat</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Nota mitjana</div>
+          <div class="kpi-val" style="color:var(--teal)">6.8</div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:68%;background:var(--teal)"></div></div>
+          <div class="kpi-note">Sobre 10 · tots els grups</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Comunicats enviats</div>
+          <div class="kpi-val" style="color:var(--purple)">312</div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:78%;background:var(--purple)"></div></div>
+          <div class="kpi-note">Aquest trimestre</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Pagaments al dia</div>
+          <div class="kpi-val" style="color:var(--amber)">87%</div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:87%;background:var(--amber)"></div></div>
+          <div class="kpi-note">↓ 2% respecte al trimestre</div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Distribució per grup</div>
+          <div id="distChart" style="display:flex;flex-direction:column;gap:10px"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Alumnes en risc</div>
+          <div class="activity-list" id="riskList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ESPAIS PAGE -->
+    <div id="pageEspais" class="page hidden">
+      <div class="page-title-row">
+        <div>
+          <div class="page-title">Espais</div>
+          <div class="page-sub">Reserva i gestió d'espais del centre</div>
+        </div>
+        <button class="btn-primary">+ Nova reserva</button>
+      </div>
+      <div class="grid-3">
+        <div class="card" style="border-top:3px solid var(--green)">
+          <div class="card-title">Aula d'informàtica</div>
+          <div style="font-size:13px;color:var(--green);font-weight:600;margin-bottom:8px">🟢 Disponible ara</div>
+          <div style="font-size:12px;color:var(--ink-40)">Propera reserva: 16:00 - 3r ESO A</div>
+          <button class="btn-primary w-full" style="margin-top:14px;font-size:13px;padding:9px">Reservar</button>
+        </div>
+        <div class="card" style="border-top:3px solid var(--accent)">
+          <div class="card-title">Gimnàs</div>
+          <div style="font-size:13px;color:var(--accent);font-weight:600;margin-bottom:8px">🔴 Ocupat fins les 14:00</div>
+          <div style="font-size:12px;color:var(--ink-40)">Ed. Física - 4t ESO A</div>
+          <button class="btn-secondary w-full" style="margin-top:14px;font-size:13px;padding:9px">Programar reserva</button>
+        </div>
+        <div class="card" style="border-top:3px solid var(--amber)">
+          <div class="card-title">Sala de reunions</div>
+          <div style="font-size:13px;color:var(--amber);font-weight:600;margin-bottom:8px">🟡 Reservada 12:00-13:00</div>
+          <div style="font-size:12px;color:var(--ink-40)">Reunió equip directiu</div>
+          <button class="btn-secondary w-full" style="margin-top:14px;font-size:13px;padding:9px">Programar reserva</button>
+        </div>
+        <div class="card" style="border-top:3px solid var(--green)">
+          <div class="card-title">Biblioteca</div>
+          <div style="font-size:13px;color:var(--green);font-weight:600;margin-bottom:8px">🟢 Disponible</div>
+          <div style="font-size:12px;color:var(--ink-40)">Cap reserva avui</div>
+          <button class="btn-primary w-full" style="margin-top:14px;font-size:13px;padding:9px">Reservar</button>
+        </div>
+        <div class="card" style="border-top:3px solid var(--teal)">
+          <div class="card-title">Laboratori</div>
+          <div style="font-size:13px;color:var(--teal);font-weight:600;margin-bottom:8px">🟢 Disponible</div>
+          <div style="font-size:12px;color:var(--ink-40)">Propera: demà 10:00</div>
+          <button class="btn-primary w-full" style="margin-top:14px;font-size:13px;padding:9px">Reservar</button>
+        </div>
+        <div class="card" style="border-top:3px solid var(--accent)">
+          <div class="card-title">Pati cobert</div>
+          <div style="font-size:13px;color:var(--accent);font-weight:600;margin-bottom:8px">🔴 Ocupat fins les 15:00</div>
+          <div style="font-size:12px;color:var(--ink-40)">Activitat extraescolar</div>
+          <button class="btn-secondary w-full" style="margin-top:14px;font-size:13px;padding:9px">Programar reserva</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIGURACIÓ PAGE -->
+    <div id="pageConfiguracio" class="page hidden">
+      <div class="page-title-row">
+        <div>
+          <div class="page-title">Configuració</div>
+          <div class="page-sub">Gestió del compte i preferències</div>
+        </div>
+      </div>
+      <div class="settings-grid">
+        <div class="settings-nav">
+          <div class="settings-nav-item active" onclick="switchSettings(this,'sProfile')">👤 Perfil</div>
+          <div class="settings-nav-item" onclick="switchSettings(this,'sCentre')">🏫 Centre</div>
+          <div class="settings-nav-item" onclick="switchSettings(this,'sNotif')">🔔 Notificacions</div>
+          <div class="settings-nav-item" onclick="switchSettings(this,'sPriv')">🔒 Privacitat</div>
+        </div>
+        <div class="settings-pane">
+          <div id="sProfile">
+            <div class="settings-section">
+              <div class="settings-section-title">Dades personals</div>
+              <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+                <div class="user-avatar" style="width:56px;height:56px;font-size:20px">MP</div>
+                <div>
+                  <div style="font-size:14px;font-weight:700;color:var(--ink)">Maria Puig</div>
+                  <div style="font-size:13px;color:var(--ink-40)">maria.puig@canbatllo.cat</div>
+                  <button class="btn-secondary" style="margin-top:8px;padding:6px 12px;font-size:12px">Canviar foto</button>
+                </div>
+              </div>
+              <label class="form-label">Nom complet</label>
+              <input class="modal-input" value="Maria Puig López">
+              <label class="form-label">Correu electrònic</label>
+              <input class="modal-input" value="maria.puig@canbatllo.cat">
+              <label class="form-label">Telèfon</label>
+              <input class="modal-input" value="93 234 56 78">
+              <button class="btn-primary" style="width:auto">Guardar canvis</button>
+            </div>
+            <div class="settings-section">
+              <div class="settings-section-title">Seguretat</div>
+              <button class="btn-secondary">🔑 Canviar contrasenya</button>
+            </div>
+          </div>
+          <div id="sCentre" class="hidden">
+            <div class="settings-section">
+              <div class="settings-section-title">Dades del centre</div>
+              <label class="form-label">Nom del centre</label>
+              <input class="modal-input" value="Institut Can Batlló">
+              <label class="form-label">Codi de centre</label>
+              <input class="modal-input" value="08060850">
+              <label class="form-label">Adreça</label>
+              <input class="modal-input" value="Carrer de Parcerisas, s/n, Barcelona">
+              <button class="btn-primary" style="width:auto">Guardar canvis</button>
+            </div>
+          </div>
+          <div id="sNotif" class="hidden">
+            <div class="settings-section">
+              <div class="settings-section-title">Notificacions</div>
+              <div class="settings-row">
+                <div><div class="settings-row-label">Missatges nous</div><div class="settings-row-sub">Avís quan rebis un missatge</div></div>
+                <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+              </div>
+              <div class="settings-row">
+                <div><div class="settings-row-label">Pagaments pendents</div><div class="settings-row-sub">Recordatoris setmanals</div></div>
+                <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+              </div>
+              <div class="settings-row">
+                <div><div class="settings-row-label">Reunions i events</div><div class="settings-row-sub">24h abans de cada event</div></div>
+                <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+              </div>
+              <div class="settings-row">
+                <div><div class="settings-row-label">Novetats de l'aplicació</div><div class="settings-row-sub">Noves funcionalitats</div></div>
+                <button class="toggle" onclick="this.classList.toggle('on')"></button>
+              </div>
+            </div>
+          </div>
+          <div id="sPriv" class="hidden">
+            <div class="settings-section">
+              <div class="settings-section-title">Privacitat i dades</div>
+              <div class="settings-row">
+                <div><div class="settings-row-label">Compartir estadístiques anònimes</div><div class="settings-row-sub">Ajuda a millorar l'aplicació</div></div>
+                <button class="toggle" onclick="this.classList.toggle('on')"></button>
+              </div>
+              <div class="settings-row">
+                <div><div class="settings-row-label">Historial d'activitat</div><div class="settings-row-sub">Guarda el registre d'accions</div></div>
+                <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+              </div>
+            </div>
+            <div class="settings-section">
+              <div class="settings-section-title" style="color:#ef4444;border-color:#fee2e2">Zona de perill</div>
+              <button style="background:#ef4444;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-family:var(--font);font-weight:600;cursor:pointer">Eliminar compte</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end main -->
+</div><!-- end app -->
+
+<!-- ═══ NOTIF PANEL ═══ -->
+<div class="notif-panel hidden" id="notifPanel">
+  <div class="notif-header">
+    <span class="notif-title">Notificacions</span>
+    <span class="notif-mark" onclick="markAllRead()">Marca totes com llegides</span>
+  </div>
+  <div class="notif-list">
+    <div class="notif-item unread" onclick="this.classList.remove('unread')">
+      <div class="notif-item-top"><span class="notif-icon">✉️</span><div><div class="notif-text"><strong>Mare de Marc R.</strong> ha enviat un missatge: "Bon dia, respecte a..."</div><div class="notif-time">Fa 12 minuts</div></div></div>
+    </div>
+    <div class="notif-item unread" onclick="this.classList.remove('unread')">
+      <div class="notif-item-top"><span class="notif-icon">💳</span><div><div class="notif-text">Pagament confirmat: <strong>Anna García</strong> ha abonat la sortida al teatre</div><div class="notif-time">Fa 1 hora</div></div></div>
+    </div>
+    <div class="notif-item unread" onclick="this.classList.remove('unread')">
+      <div class="notif-item-top"><span class="notif-icon">📅</span><div><div class="notif-text">Recordatori: <strong>Reunió de pares 3r ESO B</strong> demà a les 18h</div><div class="notif-time">Fa 2 hores</div></div></div>
+    </div>
+    <div class="notif-item" onclick="">
+      <div class="notif-item-top"><span class="notif-icon">📊</span><div><div class="notif-text">L'expedient de <strong>Carla Martí</strong> ha estat actualitzat</div><div class="notif-time">Ahir, 16:40</div></div></div>
+    </div>
+    <div class="notif-item">
+      <div class="notif-item-top"><span class="notif-icon">🌿</span><div><div class="notif-text">Nova versió d'Acàcia disponible: <strong>v3.4.1</strong> amb millores de rendiment</div><div class="notif-time">Ahir, 10:00</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODALS ═══ -->
+<div class="modal-overlay hidden" id="newClassModal">
+  <div class="modal-box">
+    <div class="modal-title">Nova classe <button class="modal-close" onclick="hideModal('newClassModal')">✕</button></div>
+    <label class="form-label">Nom de la classe</label>
+    <input class="modal-input" id="newClassName" placeholder="Ex: 2n ESO C">
+    <label class="form-label">Curs</label>
+    <select class="modal-input" id="newClassCurs">
+      <option>ESO</option><option>Batxillerat</option><option>CFGM</option><option>CFGS</option>
+    </select>
+    <label class="form-label">Professor/a tutor/a</label>
+    <input class="modal-input" placeholder="Nom del tutor/a">
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="hideModal('newClassModal')">Cancel·lar</button>
+      <button class="btn-primary" onclick="createClass()">Crear classe</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="addStudentModal">
+  <div class="modal-box">
+    <div class="modal-title">Nou alumne <button class="modal-close" onclick="hideModal('addStudentModal')">✕</button></div>
+    <label class="form-label">Nom i cognoms</label>
+    <input class="modal-input" id="newStudentName" placeholder="Ex: Joan Pérez Mas">
+    <label class="form-label">Correu família</label>
+    <input class="modal-input" placeholder="familia@exemple.cat">
+    <label class="form-label">Telèfon de contacte</label>
+    <input class="modal-input" placeholder="93 XXX XX XX">
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="hideModal('addStudentModal')">Cancel·lar</button>
+      <button class="btn-primary" onclick="addStudent()">Afegir alumne</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="importModal">
+  <div class="modal-box">
+    <div class="modal-title">Importar alumnes <button class="modal-close" onclick="hideModal('importModal')">✕</button></div>
+    <div style="background:var(--ink-05);border-radius:var(--radius-sm);padding:14px 16px;font-size:13px;color:var(--ink-60);margin-bottom:16px;line-height:1.7">
+      Importa alumnes des d'un fitxer CSV o des de Google Classroom.<br>
+      El fitxer ha de tenir les columnes: <strong>nom</strong>, <strong>cognoms</strong>, <strong>correu</strong>.
+    </div>
+    <input type="file" accept=".csv,.xlsx" style="font-size:13px;margin-bottom:16px">
+    <div class="login-divider">o</div>
+    <button class="btn-google" style="margin-top:8px;width:100%">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M17.64 9.2a10.34 10.34 0 0 0-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92a8.78 8.78 0 0 0 2.68-6.62z" fill="#4285F4"/><path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.26a5.4 5.4 0 0 1-8.05-2.84H.96v2.33A9 9 0 0 0 9 18z" fill="#34A853"/><path d="M3.99 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.03-2.33z" fill="#FBBC05"/><path d="M9 3.58a4.86 4.86 0 0 1 3.44 1.35l2.58-2.58A8.64 8.64 0 0 0 9 0 9 9 0 0 0 .96 4.95L4 7.28A5.37 5.37 0 0 1 9 3.58z" fill="#EA4335"/></svg>
+      Importar des de Google Classroom
+    </button>
+    <div class="modal-actions" style="margin-top:16px">
+      <button class="btn-secondary" onclick="hideModal('importModal')">Cancel·lar</button>
+      <button class="btn-primary">Importar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="editCommentModal">
+  <div class="modal-box" style="max-width:520px">
+    <div class="modal-title">Editar comentari — <span id="editCommentName" style="color:var(--accent)"></span> <button class="modal-close" onclick="hideModal('editCommentModal')">✕</button></div>
+    <label class="form-label">Comentari de tutoria</label>
+    <textarea class="modal-input" id="editCommentText" style="min-height:140px;resize:vertical;line-height:1.6"></textarea>
+    <label class="form-label">Etiquetes</label>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">
+      <span class="tag tag-teal" style="cursor:pointer" onclick="this.style.opacity=this.style.opacity==='0.4'?'1':'0.4'">✔ Participa</span>
+      <span class="tag tag-purple" style="cursor:pointer" onclick="this.style.opacity=this.style.opacity==='0.4'?'1':'0.4'">✔ Actitud positiva</span>
+      <span class="tag tag-amber" style="cursor:pointer" onclick="this.style.opacity=this.style.opacity==='0.4'?'1':'0.4'">⚠ Millora necessària</span>
+      <span class="tag tag-blue" style="cursor:pointer" onclick="this.style.opacity=this.style.opacity==='0.4'?'1':'0.4'">📘 Esforç continuat</span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="hideModal('editCommentModal')">Cancel·lar</button>
+      <button class="btn-primary" onclick="saveComment()">Guardar comentari</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="newMsgModal">
+  <div class="modal-box">
+    <div class="modal-title">Nou missatge <button class="modal-close" onclick="hideModal('newMsgModal')">✕</button></div>
+    <label class="form-label">Destinatari</label>
+    <input class="modal-input" placeholder="Cerca alumne, família o professor...">
+    <label class="form-label">Assumpte</label>
+    <input class="modal-input" placeholder="Ex: Reunió tutoria">
+    <label class="form-label">Missatge</label>
+    <textarea class="modal-input" style="min-height:120px;resize:vertical"></textarea>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="hideModal('newMsgModal')">Cancel·lar</button>
+      <button class="btn-primary">Enviar missatge</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="newEventModal">
+  <div class="modal-box">
+    <div class="modal-title">Nou event <button class="modal-close" onclick="hideModal('newEventModal')">✕</button></div>
+    <label class="form-label">Títol de l'event</label>
+    <input class="modal-input" placeholder="Ex: Reunió de pares">
+    <label class="form-label">Data</label>
+    <input class="modal-input" type="date">
+    <label class="form-label">Hora</label>
+    <input class="modal-input" type="time">
+    <label class="form-label">Grups implicats</label>
+    <input class="modal-input" placeholder="Ex: 2n ESO B, 3r ESO A">
+    <label class="form-label">Descripció (opcional)</label>
+    <textarea class="modal-input" style="min-height:80px;resize:vertical"></textarea>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="hideModal('newEventModal')">Cancel·lar</button>
+      <button class="btn-primary">Crear event</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="newSortidaModal">
+  <div class="modal-box">
+    <div class="modal-title">Nova sortida <button class="modal-close" onclick="hideModal('newSortidaModal')">✕</button></div>
+    <label class="form-label">Destinació</label>
+    <input class="modal-input" placeholder="Ex: Museu Picasso">
+    <label class="form-label">Data</label>
+    <input class="modal-input" type="date">
+    <label class="form-label">Grup</label>
+    <select class="modal-input"><option>2n ESO B</option><option>3r ESO A</option><option>4t ESO A</option></select>
+    <label class="form-label">Cost per alumne (€)</label>
+    <input class="modal-input" type="number" placeholder="0.00">
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="hideModal('newSortidaModal')">Cancel·lar</button>
+      <button class="btn-primary">Crear sortida</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="legalModal">
+  <div class="modal-box" style="max-width:540px;max-height:80vh;overflow-y:auto">
+    <div class="modal-title">Avís Legal — Política de Privacitat <button class="modal-close" onclick="hideModal('legalModal')">✕</button></div>
+    <p style="font-size:13px;color:var(--ink-60);line-height:1.7;margin-bottom:12px">L'accés a l'aplicació li dóna la condició d'usuari, per la qual cosa accepta les seves condicions d'ús. Es garanteix a l'usuari el dret a la protecció de les dades personals en els termes establerts per la Llei orgànica 3/2018 de Protecció de Dades Personals i el Reglament (UE) 2016/679.</p>
+    <p style="font-size:13px;color:var(--ink-60);line-height:1.7">Les dades que es requereixin seran les estrictament necessàries per a la finalitat per a la qual es recullin. Podeu exercir els vostres drets d'accés, rectificació i supressió adreçant-vos a <strong>acacia@gerardapps.cat</strong>.</p>
+    <div class="modal-actions" style="margin-top:20px">
+      <button class="btn-primary" onclick="hideModal('legalModal')">Entès</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══ DATA ═══
+const CLASSES = [
+  {id:'2ESO-B',name:'2n ESO B',curs:'ESO',tutor:'Maria Puig',students:28,badge:'Tutoria'},
+  {id:'3ESO-A',name:'3r ESO A',curs:'ESO',tutor:'Maria Puig',students:25,badge:null},
+  {id:'3ESO-B',name:'3r ESO B',curs:'ESO',tutor:'Maria Puig',students:26,badge:null},
+  {id:'4ESO-A',name:'4t ESO A',curs:'ESO',tutor:'Maria Puig',students:24,badge:null},
+  {id:'1BAT-A',name:'1r Batxillerat A',curs:'Batxillerat',tutor:'Maria Puig',students:22,badge:null},
+  {id:'2BAT-B',name:'2n Batxillerat B',curs:'Batxillerat',tutor:'Maria Puig',students:19,badge:null},
+];
+
+const STUDENTS_DATA = {
+  '2ESO-B': ['Aina Bosch','Pau Carbonell','Laia Domènech','Marc Esteve','Núria Ferrer','Jordi Gómez','Carla Hernández','Andreu Ibáñez','Marta Jové','Miquel Llorens','Sara Martí','Òscar Molina','Alícia Navarro','Bernat Olivé','Gemma Prats','Raül Quintana','Neus Roca','Sergi Sánchez','Laura Torres','Víctor Uriarte','Anna Vidal','David Ximénez','Clara Yuste','Ferran Abellà','Blanca Brugué','Pol Casado','Montserrat Dalmau','Iker Espinosa'],
+  '3ESO-A': ['Adrià Alsina','Berta Baiges','Carles Casas','Diana Castro','Eloi Coll','Fàtima Díaz','Guillem Falcó','Helena García','Ivan Gil','Júlia Grau','Lluc Herrero','Mercè Jofre','Noel López','Ona Mas','Pau Miró','Queralt Nolla','Roger Oliveras','Sofia Palau','Tomàs Pons','Úrsula Puig','Valentí Ribas','Warda Romero','Xènia Sala','Yago Solà','Zara Tarrés'],
+};
+
+const ALUMNES_TABLE = [
+  {nom:'Aina Bosch',classe:'2n ESO B',curs:'2n ESO',correu:'familia.bosch@gmail.com',estat:'ok'},
+  {nom:'Pau Carbonell',classe:'2n ESO B',curs:'2n ESO',correu:'carbonell.p@gmail.com',estat:'ok'},
+  {nom:'Laia Domènech',classe:'2n ESO B',curs:'2n ESO',correu:'ldomènech@outlook.com',estat:'warn'},
+  {nom:'Marc Esteve',classe:'2n ESO B',curs:'2n ESO',correu:'marc.esteve.fam@gmail.com',estat:'ok'},
+  {nom:'Núria Ferrer',classe:'3r ESO A',curs:'3r ESO',correu:'ferrer.familia@gmail.com',estat:'alert'},
+  {nom:'Jordi Gómez',classe:'3r ESO A',curs:'3r ESO',correu:'gomez.jordi@gmail.com',estat:'ok'},
+  {nom:'Carla Hernández',classe:'3r ESO B',curs:'3r ESO',correu:'hernandez.c@gmail.com',estat:'ok'},
+  {nom:'Andreu Ibáñez',classe:'4t ESO A',curs:'4t ESO',correu:'anibañez@gmail.com',estat:'warn'},
+  {nom:'Marta Jové',classe:'4t ESO A',curs:'4t ESO',correu:'jove.familia@hotmail.com',estat:'ok'},
+  {nom:'Miquel Llorens',classe:'1r Bat. A',curs:'1r Bat.',correu:'llorens.m@gmail.com',estat:'ok'},
+  {nom:'Sara Martí',classe:'2n Bat. B',curs:'2n Bat.',correu:'marti.s@gmail.com',estat:'ok'},
+  {nom:'Òscar Molina',classe:'2n ESO B',curs:'2n ESO',correu:'molina.oscar@gmail.com',estat:'alert'},
+];
+
+const MSGS = [
+  {id:1,sender:'Mare de Marc R.',role:'Família',time:'Fa 12 min',preview:'Bon dia, respecte a la...',unread:true,thread:['Bon dia, respecte a la reunió de dimecres, volíem confirmar la nostra assistència i preguntar si cal portar alguna documentació. Moltes gràcies.','Bon dia! No cal portar cap documentació, simplement la vostra presència. Fins dimecres!']},
+  {id:2,sender:'Cap d\'estudis',role:'Personal',time:'Fa 1h',preview:'Recordeu que la setmana...',unread:true,thread:['Recordeu que la setmana vinent tenim el claustre ordinari dijous a les 16h. Confirmeu assistència, si us plau.']},
+  {id:3,sender:'Família García',role:'Família',time:'Fa 2h',preview:'Bona tarda, la nostra filla...',unread:true,thread:['Bona tarda, la nostra filla Anna ens ha comentat que té dificultats amb matemàtiques. Podríem concertar una tutoria?','Hola! Sí, podem quedar el proper dijous a les 17h si us va bé. Confirmeu-me, gràcies.']},
+  {id:4,sender:'Secretaria',role:'Administració',time:'Ahir',preview:'La llista d\'alumnes per...',unread:false,thread:['La llista d\'alumnes per a la sortida del dia 22 ja es pot descarregar des del portal. Recordeu confirmar els alumnes participants.']},
+  {id:5,sender:'Conserge',role:'Personal',time:'Fa 2 dies',preview:'La sala de reunions de...',unread:false,thread:['La sala de reunions de la tercera planta estarà tancada per obres fins divendres. Podeu fer servir la sala petita de planta baixa.']},
+];
+
+const PAGAMENTS_TABLE = [
+  {nom:'Aina Bosch',quota:'Sortida teatre',import:'15€',venc:'22 maig',estat:'ok'},
+  {nom:'Pau Carbonell',quota:'Sortida teatre',import:'15€',venc:'22 maig',estat:'ok'},
+  {nom:'Laia Domènech',quota:'Sortida teatre',import:'15€',venc:'22 maig',estat:'warn'},
+  {nom:'Marc Esteve',quota:'Material trimestral',import:'25€',venc:'30 abril',estat:'alert'},
+  {nom:'Núria Ferrer',quota:'Sortida museu',import:'8€',venc:'5 juny',estat:'ok'},
+  {nom:'Jordi Gómez',quota:'Colònies',import:'120€',venc:'1 juny',estat:'warn'},
+  {nom:'Carla Hernández',quota:'Colònies',import:'120€',venc:'1 juny',estat:'ok'},
+  {nom:'Andreu Ibáñez',quota:'Material trimestral',import:'25€',venc:'30 abril',estat:'alert'},
+];
+
+const AVALS = [
+  {nom:'Aina Bosch',ca1:'8',ca2:'7',ca3:'9',act:'A',final:'8.2',estat:'ok'},
+  {nom:'Pau Carbonell',ca1:'6',ca2:'5',ca3:'7',act:'B',final:'5.9',estat:'warn'},
+  {nom:'Laia Domènech',ca1:'9',ca2:'9',ca3:'8',act:'A',final:'8.9',estat:'ok'},
+  {nom:'Marc Esteve',ca1:'4',ca2:'3',ca3:'5',act:'C',final:'3.8',estat:'alert'},
+  {nom:'Núria Ferrer',ca1:'7',ca2:'8',ca3:'7',act:'B',final:'7.4',estat:'ok'},
+  {nom:'Jordi Gómez',ca1:'5',ca2:'6',ca3:'4',act:'B',final:'5.1',estat:'warn'},
+];
+
+let currentStudents = [...(STUDENTS_DATA['2ESO-B']||[])];
+let activeStudent = null;
+let comments = {};
+let currentClass = null;
+let calDate = new Date(2025,4,1);
+
+// ═══ LOGIN ═══
+function doLogin(){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('app').classList.remove('hidden');
+  renderAll();
+}
+function doLogout(){
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('loginScreen').style.display='flex';
+}
+
+// ═══ NAV ═══
+function showPage(name, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
+  const page = document.getElementById('page'+cap(name));
+  if(page) page.classList.remove('hidden');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  setBreadcrumb(name);
+  hideNotifs();
+}
+
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1)}
+
+function openClass(id){
+  currentClass = CLASSES.find(c=>c.id===id)||CLASSES[0];
+  currentStudents = [...(STUDENTS_DATA[id]||generateStudents(currentClass.students))];
+  document.getElementById('classDetailTitle').textContent = currentClass.name;
+  document.getElementById('classDetailSub').textContent = currentClass.students+' alumnes'+(currentClass.badge?' · '+currentClass.badge:'');
+  renderStudents();
+  showPage('classDetail',null);
+  setBreadcrumb('classes > '+currentClass.name);
+}
+
+function setBreadcrumb(name){
+  const b = document.getElementById('breadcrumb');
+  if(name.includes('>')){
+    const parts = name.split(' > ');
+    b.innerHTML = `<span class="breadcrumb-link" onclick="showPage('classes',null)">Classes</span><span class="breadcrumb-sep">›</span><span class="breadcrumb-cur">${parts[1]}</span>`;
+  } else {
+    const labels = {dashboard:'Inici',classes:'Classes',alumnat:'Alumnat',missatgeria:'Missatgeria',calendari:'Calendari',sortides:'Sortides',avaluacions:'Avaluacions',pagaments:'Pagaments',indicadors:'Indicadors',espais:'Espais',configuracio:'Configuració'};
+    b.innerHTML = `<span class="breadcrumb-cur">${labels[name]||name}</span>`;
+  }
+}
+
+// ═══ RENDER ALL ═══
+function renderAll(){
+  renderClasses();
+  renderStudents();
+  renderAlumnat();
+  renderMsgs();
+  renderCalendar();
+  renderAvaluacions();
+  renderPagaments();
+  renderIndicadors();
+}
+
+// ═══ CLASSES GRID ═══
+function renderClasses(){
+  const grid = document.getElementById('classesGrid');
+  if(!grid) return;
+  grid.innerHTML = CLASSES.map((c,i)=>`
+    <div class="class-card" onclick="openClass('${c.id}')">
+      <h3>${c.name}${c.badge?` <span style="font-size:11px;background:var(--accent-light);color:var(--accent-dark);padding:2px 8px;border-radius:99px;vertical-align:middle">${c.badge}</span>`:''}</h3>
+      <div class="class-card-meta">
+        <span class="meta-pill">📚 ${c.curs}</span>
+        <span class="meta-pill">👤 ${c.tutor.split(' ')[0]}</span>
+      </div>
+      <div class="class-card-footer">
+        <div class="student-avatars">${generateAvatars(c.students)}</div>
+        <span class="class-card-action">${c.students} alumnes →</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function generateAvatars(n){
+  const names='ABCDEFGHIJKLMNOP'.split('');
+  return names.slice(0,Math.min(4,n)).map(l=>`<div class="student-avatar-sm">${l}</div>`).join('')+(n>4?`<div class="student-avatar-sm">+${n-4}</div>`:'');
+}
+
+function generateStudents(n){
+  const firsts=['Aina','Pau','Laia','Marc','Núria','Jordi','Carla','Andreu','Marta','Miquel','Sara','Òscar','Alícia','Bernat','Gemma','Raül','Neus','Sergi','Laura','Víctor','Anna','David','Clara','Ferran'];
+  const lasts=['Bosch','Carbonell','Domènech','Esteve','Ferrer','Gómez','Hernández','Ibáñez','Jové','Llorens','Martí','Molina'];
+  return Array.from({length:n},(_, i)=>`${firsts[i%firsts.length]} ${lasts[i%lasts.length]}`);
+}
+
+// ═══ STUDENTS ═══
+function renderStudents(filter=''){
+  const list = document.getElementById('studentsList');
+  if(!list) return;
+  const filtered = currentStudents.filter(s=>s.toLowerCase().includes(filter.toLowerCase()));
+  document.getElementById('studentCount').textContent = filtered.length;
+  list.innerHTML = filtered.map((s,i)=>{
+    const hasComment = !!comments[s];
+    const initials = s.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    return `<li class="student-item${activeStudent===s?' active':''}" onclick="selectStudent('${s}')">
+      <div class="student-avatar-xs">${initials}</div>
+      <span class="student-name">${s}</span>
+      ${hasComment?'<div class="comment-dot"></div>':''}
+    </li>`;
+  }).join('');
+}
+
+function filterStudents(val){renderStudents(val)}
+
+function selectStudent(name){
+  activeStudent = name;
+  renderStudents(document.querySelector('.search-input')?.value||'');
+  renderCommentPanel();
+}
+
+function renderCommentPanel(){
+  const panel = document.getElementById('commentsPanel');
+  if(!panel) return;
+  if(!activeStudent){
+    panel.innerHTML = `<div class="comments-empty"><div class="comments-empty-icon">💬</div><h3 style="font-size:17px;font-weight:700;color:var(--ink-40);margin-bottom:8px">Selecciona un alumne</h3><p style="font-size:14px;color:var(--ink-20)">Fes clic a un alumne per veure o editar el seu comentari</p></div>`;
+    return;
+  }
+  const c = comments[activeStudent];
+  const initials = activeStudent.split(' ').map(w=>w[0]).join('').slice(0,2);
+  panel.innerHTML = `
+    <div class="comment-card">
+      <div class="comment-header">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="student-avatar-md" style="background:var(--accent-light);color:var(--accent-dark)">${initials}</div>
+          <div>
+            <div class="comment-student">${activeStudent}</div>
+            <div style="font-size:12px;color:var(--ink-40)">${currentClass?.name||'Classe'} · 1r Trimestre</div>
+          </div>
+        </div>
+        <div class="comment-actions">
+          <button class="btn-icon-sm" onclick="copyComment()" title="Copiar">📋</button>
+          <button class="btn-icon-sm" onclick="openEditComment()" title="Editar">✏</button>
+        </div>
+      </div>
+      <div class="comment-body ${c?'':'empty-text'}">${c||'Encara no hi ha cap comentari per a aquest alumne. Fes clic a editar per afegir-ne un.'}</div>
+      ${c?`<div class="comment-tags"><span class="tag tag-teal">Participa</span><span class="tag tag-blue">Esforç continuat</span></div>`:''}
+      <div style="margin-top:12px">
+        <button class="btn-primary" onclick="openEditComment()" style="font-size:13px;padding:9px 16px">${c?'✏ Editar comentari':'+ Afegir comentari'}</button>
+      </div>
+    </div>
+  `;
+}
+
+function openEditComment(){
+  document.getElementById('editCommentName').textContent = activeStudent;
+  document.getElementById('editCommentText').value = comments[activeStudent]||'';
+  showModal('editCommentModal');
+}
+
+function saveComment(){
+  const txt = document.getElementById('editCommentText').value.trim();
+  if(activeStudent) comments[activeStudent] = txt;
+  hideModal('editCommentModal');
+  renderStudents();
+  renderCommentPanel();
+}
+
+function copyComment(){
+  const c = comments[activeStudent];
+  if(c) navigator.clipboard.writeText(c).then(()=>showToast('Comentari copiat!'));
+}
+
+// ═══ ALUMNAT TABLE ═══
+function renderAlumnat(){
+  const body = document.getElementById('alumnatBody');
+  if(!body) return;
+  body.innerHTML = ALUMNES_TABLE.map(a=>{
+    const initials = a.nom.split(' ').map(w=>w[0]).join('').slice(0,2);
+    const colors=['var(--accent)','var(--teal)','var(--purple)','var(--amber)','var(--blue)'];
+    const ci = Math.abs(a.nom.charCodeAt(0)-65)%colors.length;
+    const estMap={ok:'<span class="status-badge status-ok">Al dia</span>',warn:'<span class="status-badge status-warn">Pendent</span>',alert:'<span class="status-badge status-alert">Vençut</span>'};
+    return `<tr>
+      <td><div class="student-cell"><div class="student-avatar-md" style="background:${colors[ci]}20;color:${colors[ci]}">${initials}</div><span class="student-full-name">${a.nom}</span></div></td>
+      <td>${a.classe}</td>
+      <td>${a.curs}</td>
+      <td style="font-size:12px;color:var(--ink-40)">${a.correu}</td>
+      <td>${estMap[a.estat]}</td>
+      <td><div style="display:flex;gap:6px"><button class="btn-icon-sm" title="Veure fitxa">👁</button><button class="btn-icon-sm" title="Missatge">✉</button></div></td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══ MISSATGERIA ═══
+let activeMsgId = null;
+function renderMsgs(){
+  const body = document.getElementById('msgListBody');
+  if(!body) return;
+  body.innerHTML = MSGS.map(m=>`
+    <div class="msg-item ${m.unread?'msg-unread':''} ${activeMsgId===m.id?'active':''}" onclick="openMsg(${m.id})">
+      <div class="msg-item-top">
+        <span class="msg-sender">${m.unread?'<span class="msg-unread-dot"></span>':''}${m.sender}</span>
+        <span class="msg-time">${m.time}</span>
+      </div>
+      <div class="msg-preview">${m.preview}</div>
+    </div>
+  `).join('');
+}
+
+function openMsg(id){
+  activeMsgId = id;
+  const m = MSGS.find(x=>x.id===id);
+  m.unread = false;
+  renderMsgs();
+  const pane = document.getElementById('msgPane');
+  const initials = m.sender.slice(0,2).toUpperCase();
+  const bubbles = m.thread.map((t,i)=>`
+    <div>
+      <div class="msg-bubble ${i%2===0?'recv':'sent'}">${t}<div class="msg-bubble-time">${i===0?m.time:'Fa pocs minuts'}</div></div>
+    </div>
+  `).join('');
+  pane.innerHTML = `
+    <div class="msg-pane-header">
+      <div class="msg-pane-avatar">${initials}</div>
+      <div><div class="msg-pane-name">${m.sender}</div><div class="msg-pane-sub">${m.role}</div></div>
+    </div>
+    <div class="msg-pane-body">${bubbles}</div>
+    <div class="msg-pane-footer">
+      <input class="msg-input" placeholder="Escriu una resposta..." id="msgReplyInput">
+      <button class="btn-primary" onclick="sendReply(${id})" style="padding:10px 16px;font-size:13px">Enviar</button>
+    </div>
+  `;
+}
+
+function sendReply(id){
+  const input = document.getElementById('msgReplyInput');
+  const txt = input.value.trim();
+  if(!txt) return;
+  const m = MSGS.find(x=>x.id===id);
+  m.thread.push(txt);
+  input.value='';
+  openMsg(id);
+  showToast('Missatge enviat!');
+}
+
+// ═══ CALENDAR ═══
+const CAL_EVENTS = {
+  '2025-5-7':[{text:'Reunió pares ESO',type:'coral'}],
+  '2025-5-14':[{text:'Avui — claustrat',type:'teal'},{text:'Tutoria 2n ESO',type:'purple'}],
+  '2025-5-22':[{text:'Sortida teatre',type:'amber'}],
+  '2025-5-28':[{text:'Reunió equip',type:'teal'}],
+  '2025-5-5':[{text:'Lliurament notes',type:'purple'}],
+};
+
+function renderCalendar(){
+  const grid = document.getElementById('calGrid');
+  if(!grid) return;
+  const y = calDate.getFullYear(), m = calDate.getMonth();
+  const months = ['Gener','Febrer','Març','Abril','Maig','Juny','Juliol','Agost','Setembre','Octubre','Novembre','Desembre'];
+  const days = ['Dl','Dt','Dc','Dj','Dv','Ds','Dg'];
+  document.getElementById('calMonthLabel').textContent = months[m]+' '+y;
+  const first = new Date(y,m,1);
+  let startDay = first.getDay()-1; if(startDay<0) startDay=6;
+  const daysInMonth = new Date(y,m+1,0).getDate();
+  const prevDays = new Date(y,m,0).getDate();
+  const today = new Date();
+  let html = days.map(d=>`<div class="cal-day-label">${d}</div>`).join('');
+  for(let i=0;i<startDay;i++){
+    const d = prevDays-startDay+1+i;
+    html+=`<div class="cal-day other-month"><div class="cal-day-num">${d}</div></div>`;
+  }
+  for(let d=1;d<=daysInMonth;d++){
+    const isToday = today.getFullYear()===y && today.getMonth()===m && today.getDate()===d;
+    const key = `${y}-${m+1}-${d}`;
+    const evs = (CAL_EVENTS[key]||[]).map(e=>`<div class="cal-event ${e.type}">${e.text}</div>`).join('');
+    html+=`<div class="cal-day${isToday?' today':''}"><div class="cal-day-num">${d}</div>${evs}</div>`;
+  }
+  const remaining = (7-((startDay+daysInMonth)%7))%7;
+  for(let i=1;i<=remaining;i++) html+=`<div class="cal-day other-month"><div class="cal-day-num">${i}</div></div>`;
+  grid.innerHTML = html;
+}
+
+function changeMonth(dir){
+  calDate = new Date(calDate.getFullYear(), calDate.getMonth()+dir, 1);
+  renderCalendar();
+}
+
+// ═══ AVALUACIONS ═══
+function renderAvaluacions(){
+  const body = document.getElementById('avaluacionsBody');
+  if(!body) return;
+  body.innerHTML = AVALS.map(a=>{
+    const estMap={ok:'<span class="status-badge status-ok">Assoliment Satisfactori</span>',warn:'<span class="status-badge status-warn">Assoliment Parcial</span>',alert:'<span class="status-badge status-alert">No Assoliment</span>'};
+    const initials = a.nom.split(' ').map(w=>w[0]).join('').slice(0,2);
+    return `<tr>
+      <td><div class="student-cell"><div class="student-avatar-md">${initials}</div><span class="student-full-name">${a.nom}</span></div></td>
+      <td style="font-weight:600">${a.ca1}</td>
+      <td style="font-weight:600">${a.ca2}</td>
+      <td style="font-weight:600">${a.ca3}</td>
+      <td>${a.act}</td>
+      <td style="font-weight:800;font-size:15px;color:var(--ink)">${a.final}</td>
+      <td>${estMap[a.estat]}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══ PAGAMENTS ═══
+function renderPagaments(){
+  const body = document.getElementById('pagamentsBody');
+  if(!body) return;
+  body.innerHTML = PAGAMENTS_TABLE.map(p=>{
+    const estMap={ok:'<span class="status-badge status-ok">Pagat</span>',warn:'<span class="status-badge status-warn">Pendent</span>',alert:'<span class="status-badge status-alert">Vençut</span>'};
+    return `<tr>
+      <td style="font-weight:600">${p.nom}</td>
+      <td>${p.quota}</td>
+      <td style="font-weight:700">${p.import}</td>
+      <td style="font-size:13px;color:var(--ink-40)">${p.venc}</td>
+      <td>${estMap[p.estat]}</td>
+      <td><button class="btn-icon-sm">✉</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══ INDICADORS ═══
+function renderIndicadors(){
+  const dist = document.getElementById('distChart');
+  if(!dist) return;
+  const groups = [{name:'2n ESO B',pct:94,color:'var(--accent)'},{name:'3r ESO A',pct:96,color:'var(--teal)'},{name:'3r ESO B',pct:91,color:'var(--purple)'},{name:'4t ESO A',pct:89,color:'var(--amber)'},{name:'1r Bat. A',pct:97,color:'var(--blue)'},{name:'2n Bat. B',pct:98,color:'#ec4899'}];
+  dist.innerHTML = groups.map(g=>`
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:13px;color:var(--ink-60);width:110px;flex-shrink:0">${g.name}</span>
+      <div style="flex:1;height:8px;background:var(--ink-10);border-radius:99px;overflow:hidden"><div style="height:100%;width:${g.pct}%;background:${g.color};border-radius:99px"></div></div>
+      <span style="font-size:13px;font-weight:700;color:var(--ink);width:36px;text-align:right">${g.pct}%</span>
+    </div>
+  `).join('');
+  const risk = document.getElementById('riskList');
+  if(!risk) return;
+  risk.innerHTML = [
+    {nom:'Laia Domènech',classe:'2n ESO B',motiu:'Pagament vençut',dot:'coral'},
+    {nom:'Marc Esteve',classe:'2n ESO B',motiu:'Nota mitjana <5',dot:'coral'},
+    {nom:'Andreu Ibáñez',classe:'4t ESO A',motiu:'Absències reiterades',dot:'amber'},
+    {nom:'Núria Ferrer',classe:'3r ESO A',motiu:'Informe familiar pendent',dot:'purple'},
+  ].map(r=>`
+    <div class="activity-item">
+      <div class="activity-dot ${r.dot}"></div>
+      <div>
+        <div class="activity-text"><strong>${r.nom}</strong> · ${r.classe}</div>
+        <div class="activity-time">${r.motiu}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ═══ MODALS ═══
+function showModal(id){document.getElementById(id).classList.remove('hidden')}
+function hideModal(id){document.getElementById(id).classList.add('hidden')}
+
+document.addEventListener('click',e=>{
+  if(e.target.classList.contains('modal-overlay')) e.target.classList.add('hidden');
+});
+
+function createClass(){
+  const name = document.getElementById('newClassName').value.trim();
+  if(!name) return;
+  CLASSES.push({id:'custom-'+Date.now(),name,curs:'ESO',tutor:'Maria Puig',students:0,badge:null});
+  renderClasses();
+  hideModal('newClassModal');
+  document.getElementById('newClassName').value='';
+  showToast('Classe creada!');
+}
+
+function addStudent(){
+  const name = document.getElementById('newStudentName').value.trim();
+  if(!name) return;
+  if(currentClass) currentStudents.push(name);
+  renderStudents();
+  hideModal('addStudentModal');
+  document.getElementById('newStudentName').value='';
+  showToast('Alumne afegit!');
+}
+
+// ═══ PERIODES ═══
+function selectTab(btn){
+  document.querySelectorAll('.periode-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  activeStudent = null;
+  renderCommentPanel();
+}
+
+let periodeCount = 4;
+function addPeriode(){
+  periodeCount++;
+  const tabs = document.getElementById('periodesTabs');
+  const btn = document.createElement('button');
+  btn.className = 'periode-tab';
+  btn.textContent = 'Període '+periodeCount;
+  btn.onclick = function(){selectTab(this)};
+  tabs.appendChild(btn);
+  selectTab(btn);
+}
+
+// ═══ NOTIFS ═══
+function toggleNotifs(){
+  document.getElementById('notifPanel').classList.toggle('hidden');
+}
+function hideNotifs(){document.getElementById('notifPanel')?.classList.add('hidden')}
+function markAllRead(){document.querySelectorAll('.notif-item.unread').forEach(n=>n.classList.remove('unread'));showToast('Totes marcades com llegides')}
+
+// ═══ TABS ═══
+function switchTab(btn,targetId){
+  btn.closest('.tabs').querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function switchSettings(item,panelId){
+  item.closest('.settings-grid').querySelectorAll('.settings-nav-item').forEach(i=>i.classList.remove('active'));
+  item.classList.add('active');
+  ['sProfile','sCentre','sNotif','sPriv'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.classList.toggle('hidden', id!==panelId);
+  });
+}
+
+// ═══ HELPERS ═══
+function showToast(msg){
+  const t = document.createElement('div');
+  t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;z-index:9999;animation:slideUp 0.2s ease;pointer-events:none;font-family:var(--font)';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),2500);
+}
+function toggleHelp(){showToast('Ajuda: acacia@gerardapps.cat')}
+function filterByClass(val){}
+</script>
+</body>
+</html>
