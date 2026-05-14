@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Acàcia — Plataforma Acadèmica</title>
+<title>Gestiona — Plataforma Acadèmica</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -515,9 +515,9 @@ body{font-family:var(--font);background:var(--ink-05);color:var(--ink);min-heigh
   <div class="login-card">
     <div class="login-logo">
       <div class="logo-icon">🌿</div>
-      <div class="login-brand">Acà<span>cia</span></div>
+      <div class="login-brand">Gesti<span>ona</span></div>
     </div>
-    <p class="login-sub">Control Acadèmic, Comunicació i Administració<br>Institut Can Batlló · Barcelona</p>
+    <p class="login-sub">Gestor intel·ligent de Control Acadèmic,<br>Comunicació i Administració</p>
     <div class="login-form">
       <div class="field-wrap">
         <span class="field-icon">✉</span>
@@ -529,7 +529,7 @@ body{font-family:var(--font);background:var(--ink-05);color:var(--ink);min-heigh
       </div>
       <button class="btn-primary" onclick="doLogin()">Entra a l'aplicació</button>
       <div class="login-divider">o</div>
-      <button class="btn-google" onclick="doLogin()">
+      <button class="btn-google" onclick="doLoginGoogle()">
         <svg class="google-g" viewBox="0 0 18 18" fill="none"><path d="M17.64 9.2a10.34 10.34 0 0 0-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92a8.78 8.78 0 0 0 2.68-6.62z" fill="#4285F4"/><path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.26a5.4 5.4 0 0 1-8.05-2.84H.96v2.33A9 9 0 0 0 9 18z" fill="#34A853"/><path d="M3.99 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.03-2.33z" fill="#FBBC05"/><path d="M9 3.58a4.86 4.86 0 0 1 3.44 1.35l2.58-2.58A8.64 8.64 0 0 0 9 0 9 9 0 0 0 .96 4.95L4 7.28A5.37 5.37 0 0 1 9 3.58z" fill="#EA4335"/></svg>
         Inicia sessió amb Google
       </button>
@@ -549,7 +549,7 @@ body{font-family:var(--font);background:var(--ink-05);color:var(--ink);min-heigh
       <div class="sidebar-brand">
         <div class="sidebar-logo-wrap">🌿</div>
         <div class="sidebar-title-wrap">
-          <div class="sidebar-title">Acà<span>cia</span></div>
+          <div class="sidebar-title">Gesti<span>ona</span></div>
           <div class="sidebar-subtitle">Institut Can Batlló</div>
         </div>
       </div>
@@ -1416,16 +1416,174 @@ let comments = {};
 let currentClass = null;
 let calDate = new Date(2025,4,1);
 
-// ═══ LOGIN ═══
+// ═══ FIREBASE ═══
+let db, auth, currentUser;
+
+async function initFirebase(){
+  const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+  const { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
+  const { getDatabase, ref, set, get, push, onValue, remove } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js');
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBF7P-Soao-ZSams3JceNVRYpr5tNs_RIs",
+    authDomain: "campeonato-82be4.firebaseapp.com",
+    databaseURL: "https://campeonato-82be4-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "campeonato-82be4",
+    storageBucket: "campeonato-82be4.firebasestorage.app",
+    messagingSenderId: "185901856877",
+    appId: "1:185901856877:web:f1336e539b7a92aeb36764"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getDatabase(app);
+
+  // ── Escolta canvis d'autenticació ──
+  onAuthStateChanged(auth, user => {
+    if(user){
+      currentUser = user;
+      const name = user.displayName || user.email.split('@')[0];
+      const initials = name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+      document.getElementById('userName').textContent = name;
+      document.getElementById('userAvatar').textContent = initials;
+      document.getElementById('loginScreen').style.display='none';
+      document.getElementById('app').classList.remove('hidden');
+      loadFirebaseData();
+    } else {
+      currentUser = null;
+      document.getElementById('app').classList.add('hidden');
+      document.getElementById('loginScreen').style.display='flex';
+    }
+  });
+
+  // ── Login amb email/password ──
+  window.doLogin = async function(){
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass  = document.getElementById('loginPass').value;
+    if(!email || !pass){ showToast('Introdueix correu i contrasenya'); return; }
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+    } catch(e){
+      showToast('Error: '+friendlyAuthError(e.code));
+    }
+  };
+
+  // ── Login amb Google ──
+  window.doLoginGoogle = async function(){
+    try {
+      await signInWithPopup(auth, new GoogleAuthProvider());
+    } catch(e){
+      showToast('Error Google: '+e.message);
+    }
+  };
+
+  // ── Logout ──
+  window.doLogout = async function(){
+    await signOut(auth);
+  };
+
+  // ── Carregar dades des de Firebase ──
+  async function loadFirebaseData(){
+    const uid = currentUser.uid;
+
+    // Classes
+    const classesSnap = await get(ref(db, `gestiona/${uid}/classes`));
+    if(classesSnap.exists()){
+      const data = classesSnap.val();
+      CLASSES.length = 0;
+      Object.entries(data).forEach(([id,c])=> CLASSES.push({id, ...c}));
+    } else {
+      // Primer login: escriu les classes demo
+      CLASSES.forEach(c=> set(ref(db,`gestiona/${uid}/classes/${c.id}`), c));
+    }
+
+    // Comentaris (escolta en temps real)
+    onValue(ref(db,`gestiona/${uid}/comentaris`), snap=>{
+      comments = snap.exists() ? snap.val() : {};
+      renderStudents();
+      if(activeStudent) renderCommentPanel();
+    });
+
+    // Alumnes per classe (escolta en temps real)
+    onValue(ref(db,`gestiona/${uid}/alumnes`), snap=>{
+      if(snap.exists()){
+        const data = snap.val();
+        Object.entries(data).forEach(([classId, list])=>{
+          STUDENTS_DATA[classId] = Array.isArray(list) ? list : Object.values(list);
+        });
+      } else {
+        // Primer login: escriu alumnes demo
+        Object.entries(STUDENTS_DATA).forEach(([classId,list])=>{
+          set(ref(db,`gestiona/${uid}/alumnes/${classId}`), list);
+        });
+      }
+      renderAll();
+    });
+  }
+
+  // ── Guardar comentari a Firebase ──
+  const _origSaveComment = window.saveComment;
+  window.saveComment = function(){
+    const txt = document.getElementById('editCommentText').value.trim();
+    if(activeStudent && currentUser){
+      set(ref(db,`gestiona/${currentUser.uid}/comentaris/${activeStudent.replace(/\s/g,'_')}`), txt||null);
+      comments[activeStudent] = txt;
+    }
+    hideModal('editCommentModal');
+    renderStudents();
+    renderCommentPanel();
+  };
+
+  // ── Afegir alumne a Firebase ──
+  const _origAddStudent = window.addStudent;
+  window.addStudent = function(){
+    const name = document.getElementById('newStudentName').value.trim();
+    if(!name) return;
+    if(currentClass && currentUser){
+      currentStudents.push(name);
+      set(ref(db,`gestiona/${currentUser.uid}/alumnes/${currentClass.id}`), currentStudents);
+    }
+    renderStudents();
+    hideModal('addStudentModal');
+    document.getElementById('newStudentName').value='';
+    showToast('Alumne afegit i guardat!');
+  };
+
+  // ── Crear classe a Firebase ──
+  const _origCreateClass = window.createClass;
+  window.createClass = function(){
+    const name = document.getElementById('newClassName').value.trim();
+    if(!name || !currentUser) return;
+    const id = 'cls-'+Date.now();
+    const cls = {id, name, curs:document.getElementById('newClassCurs').value, tutor:'', students:0, badge:null};
+    CLASSES.push(cls);
+    set(ref(db,`gestiona/${currentUser.uid}/classes/${id}`), cls);
+    renderClasses();
+    hideModal('newClassModal');
+    document.getElementById('newClassName').value='';
+    showToast('Classe creada i guardada!');
+  };
+}
+
+function friendlyAuthError(code){
+  const map = {'auth/user-not-found':'Usuari no trobat','auth/wrong-password':'Contrasenya incorrecta','auth/invalid-email':'Correu invàlid','auth/too-many-requests':'Massa intents, espera uns minuts'};
+  return map[code]||code;
+}
+
+// Inici: substituïm les funcions síncrones fins que Firebase carregui
 function doLogin(){
-  document.getElementById('loginScreen').style.display='none';
-  document.getElementById('app').classList.remove('hidden');
-  renderAll();
+  showToast('Connectant...');
+}
+function doLoginGoogle(){
+  showToast('Connectant...');
 }
 function doLogout(){
   document.getElementById('app').classList.add('hidden');
   document.getElementById('loginScreen').style.display='flex';
 }
+
+// Inicialitza Firebase en carregar la pàgina
+initFirebase();
 
 // ═══ NAV ═══
 function showPage(name, btn){
@@ -1838,7 +1996,7 @@ function showToast(msg){
   document.body.appendChild(t);
   setTimeout(()=>t.remove(),2500);
 }
-function toggleHelp(){showToast('Ajuda: acacia@gerardapps.cat')}
+function toggleHelp(){showToast('Ajuda: gestiona@gerardapps.cat')}
 function filterByClass(val){}
 </script>
 </body>
