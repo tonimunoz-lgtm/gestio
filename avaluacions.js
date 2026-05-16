@@ -2,8 +2,8 @@
 //  Gestiona — Mòdul: Avaluacions
 // ═══════════════════════════════════════════
 
-import { G } from '../firebase-config.js';
-import { showToast, badge, exportCSV } from '../ui.js';
+import { G } from './firebase-config.js';
+import { showToast, badge, exportCSV } from './ui.js';
 
 let _db, _ref, _get, _set;
 

@@ -2,8 +2,8 @@
 //  Gestiona — Mòdul: Calendari
 // ═══════════════════════════════════════════
 
-import { G } from '../firebase-config.js';
-import { showToast, showModal, hideModal } from '../ui.js';
+import { G } from './firebase-config.js';
+import { showToast, showModal, hideModal } from './ui.js';
 
 let _db, _ref, _get, _push;
 let _calDate = new Date();

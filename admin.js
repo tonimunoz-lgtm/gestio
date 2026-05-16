@@ -3,11 +3,11 @@
 //  Panell d'administrador: mòduls, centre, curs
 // ═══════════════════════════════════════════
 
-import { G, MODULES_DEF, ROLES_DEF, FB_CONFIG } from '../firebase-config.js';
+import { G, MODULES_DEF, ROLES_DEF, FB_CONFIG } from './firebase-config.js';
 import { showToast, showModal, hideModal, showConfirm, openDynModal,
-         initTabs, badge, roleChip, initials, avatar, fmtDate } from '../ui.js';
-import { createUserViaRest } from '../auth.js';
-import { buildSidebar, navigate } from '../router.js';
+         initTabs, badge, roleChip, initials, avatar, fmtDate } from './ui.js';
+import { createUserViaRest } from './auth.js';
+import { buildSidebar, navigate } from './router.js';
 
 let _db, _ref, _set, _get, _update, _push, _remove, _onValue;
 

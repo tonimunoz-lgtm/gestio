@@ -2,8 +2,8 @@
 //  Gestiona — Mòdul: Guàrdies
 // ═══════════════════════════════════════════
 
-import { G } from '../firebase-config.js';
-import { showToast, badge, initials, avatar } from '../ui.js';
+import { G } from './firebase-config.js';
+import { showToast, badge, initials, avatar } from './ui.js';
 
 let _db, _ref, _get, _set;
 

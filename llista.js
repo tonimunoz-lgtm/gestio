@@ -3,8 +3,8 @@
 //  Passar llista per classe i data
 // ═══════════════════════════════════════════
 
-import { G } from '../firebase-config.js';
-import { showToast, initials, avatar, exportCSV } from '../ui.js';
+import { G } from './firebase-config.js';
+import { showToast, initials, avatar, exportCSV } from './ui.js';
 
 let _db, _ref, _get, _set;
 

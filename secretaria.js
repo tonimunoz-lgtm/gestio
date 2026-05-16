@@ -3,10 +3,10 @@
 //  Alumnes, grups, importació Excel/CSV
 // ═══════════════════════════════════════════
 
-import { G } from '../firebase-config.js';
+import { G } from './firebase-config.js';
 import { showToast, showModal, hideModal, showConfirm, openDynModal,
-         initTabs, badge, initials, avatar, exportCSV, filterTable } from '../ui.js';
-import { navigate } from '../router.js';
+         initTabs, badge, initials, avatar, exportCSV, filterTable } from './ui.js';
+import { navigate } from './router.js';
 
 let _db, _ref, _set, _get, _update, _push, _remove;
 

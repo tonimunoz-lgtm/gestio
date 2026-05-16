@@ -2,9 +2,9 @@
 //  Gestiona — Mòdul: Missatgeria
 // ═══════════════════════════════════════════
 
-import { G } from '../firebase-config.js';
-import { showToast, showModal, hideModal, initials, avatar } from '../ui.js';
-import { navigate } from '../router.js';
+import { G } from './firebase-config.js';
+import { showToast, showModal, hideModal, initials, avatar } from './ui.js';
+import { navigate } from './router.js';
 
 let _db, _ref, _get, _push, _update;
 

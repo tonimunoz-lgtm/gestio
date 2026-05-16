@@ -2,7 +2,7 @@
 //  Gestiona — Mòdul: Dashboard
 // ═══════════════════════════════════════════
 
-import { G, MODULES_DEF } from '../firebase-config.js';
+import { G, MODULES_DEF } from './firebase-config.js';
 
 let _db, _ref, _get;
 

@@ -3,10 +3,10 @@
 //  Absències professors + Passar llista alumnes
 // ═══════════════════════════════════════════
 
-import { G } from '../firebase-config.js';
+import { G } from './firebase-config.js';
 import { showToast, showModal, hideModal, openDynModal, initTabs,
-         badge, initials, avatar, fmtDate } from '../ui.js';
-import { navigate } from '../router.js';
+         badge, initials, avatar, fmtDate } from './ui.js';
+import { navigate } from './router.js';
 
 let _db, _ref, _set, _get, _update, _push, _remove;
 
@@ -295,7 +295,7 @@ export function bindAbsencies() {
       const a = alumnes[id] || {};
       rows.push([a.nom || '', a.cognoms || '', ESTAT_LABELS[e] || e, data]);
     });
-    const { exportCSV } = await import('../ui.js');
+    const { exportCSV } = await import('./ui.js');
     exportCSV(rows, `llista_${classeId}_${data}.csv`);
     showToast('Exportat!', 'success');
   };

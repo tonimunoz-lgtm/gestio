@@ -2,8 +2,8 @@
 //  Gestiona — Mòdul: Indicadors
 // ═══════════════════════════════════════════
 
-import { G, MODULES_DEF, ROLES_DEF } from '../firebase-config.js';
-import { badge, roleChip } from '../ui.js';
+import { G, MODULES_DEF, ROLES_DEF } from './firebase-config.js';
+import { badge, roleChip } from './ui.js';
 
 let _db, _ref, _get;
 

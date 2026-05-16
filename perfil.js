@@ -2,8 +2,8 @@
 //  Gestiona — Mòdul: Perfil
 // ═══════════════════════════════════════════
 
-import { G, ROLES_DEF } from '../firebase-config.js';
-import { showToast, showModal, hideModal, avatar, initials } from '../ui.js';
+import { G, ROLES_DEF } from './firebase-config.js';
+import { showToast, showModal, hideModal, avatar, initials } from './ui.js';
 
 let _db, _ref, _update;
 
