@@ -5,11 +5,240 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gestiona — Plataforma Acadèmica</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="main.css">
+<style>
+:root{--ink:#0f0f1a;--ink-80:#1e1e32;--ink-60:#3d3d58;--ink-40:#7c7c9a;--ink-20:#c5c5d8;--ink-10:#e8e8f0;--ink-05:#f4f4f8;--accent:#ff5f6d;--accent-dark:#e04050;--accent-light:#fff0f1;--teal:#00b4a0;--teal-light:#e0faf8;--purple:#7c3aed;--purple-light:#f5f0ff;--amber:#f59e0b;--amber-light:#fffbeb;--blue:#3b82f6;--blue-light:#eff6ff;--green:#10b981;--green-light:#ecfdf5;--white:#ffffff;--radius:12px;--radius-sm:8px;--sidebar-w:250px;--font:'Outfit',system-ui,sans-serif;--shadow:0 4px 20px rgba(15,15,26,.08);--shadow-md:0 8px 32px rgba(15,15,26,.12);--shadow-lg:0 16px 48px rgba(15,15,26,.18)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--ink-05);color:var(--ink);min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-thumb{background:var(--ink-20);border-radius:99px}
+.hidden{display:none!important}a{text-decoration:none}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes loadBar{0%{width:0;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0;margin-left:100%}}
+/* LOADING */
+#loadingScreen{position:fixed;inset:0;background:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:20px;transition:opacity .4s ease}
+.loading-logo{font-size:52px;animation:float 2s ease-in-out infinite}
+.loading-brand{color:#fff;font-size:28px;font-weight:800;letter-spacing:-.5px}
+.loading-brand span{color:var(--accent)}
+.loading-sub{color:rgba(255,255,255,.35);font-size:13px}
+.loading-bar{width:200px;height:3px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden}
+.loading-bar-fill{height:100%;background:var(--accent);border-radius:99px;animation:loadBar 1.5s ease infinite}
+/* LOGIN */
+#loginScreen{position:fixed;inset:0;background:linear-gradient(135deg,var(--ink) 0%,#1a1a3e 50%,#0f2027 100%);display:flex;align-items:center;justify-content:center;z-index:9000;overflow:hidden}
+#loginScreen::before{content:'';position:absolute;top:-40%;right:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(255,95,109,.18) 0%,transparent 70%);border-radius:50%}
+#loginScreen::after{content:'';position:absolute;bottom:-30%;left:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(0,180,160,.12) 0%,transparent 70%);border-radius:50%}
+.login-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(20px);border-radius:24px;padding:44px 38px;width:100%;max-width:420px;box-shadow:var(--shadow-lg);position:relative;z-index:1;animation:slideUp .5s ease}
+.login-logo{display:flex;flex-direction:column;align-items:center;margin-bottom:18px}
+.logo-icon{font-size:48px;animation:float 3s ease-in-out infinite}
+.login-brand{color:#fff;font-size:26px;font-weight:800;letter-spacing:-.5px;margin-top:6px}
+.login-brand span{color:var(--accent)}
+.login-sub{color:rgba(255,255,255,.4);font-size:12.5px;text-align:center;margin-bottom:26px;line-height:1.6}
+.login-form{display:flex;flex-direction:column;gap:9px}
+.field-wrap{position:relative}
+.field-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.3);font-size:15px;pointer-events:none}
+.login-input{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius-sm);color:#fff;padding:13px 16px 13px 42px;font-size:13.5px;font-family:var(--font);transition:all .2s;outline:none;width:100%}
+.login-input::placeholder{color:rgba(255,255,255,.28)}
+.login-input:focus{border-color:var(--accent);background:rgba(255,255,255,.1);box-shadow:0 0 0 3px rgba(255,95,109,.15)}
+.login-divider{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,.22);font-size:11px;margin:2px 0}
+.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.1)}
+.login-footer{text-align:center;margin-top:14px;display:flex;gap:16px;justify-content:center}
+.login-footer a{color:rgba(255,255,255,.3);font-size:12px;cursor:pointer;text-decoration:underline;transition:color .2s}
+.login-footer a:hover{color:rgba(255,255,255,.7)}
+.login-error{background:rgba(255,95,109,.15);border:1px solid rgba(255,95,109,.3);border-radius:var(--radius-sm);padding:9px 13px;font-size:12.5px;color:#ff8f9d;display:none}
+.login-error.show{display:block}
+.btn-google{background:rgba(255,255,255,.08);color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.15);border-radius:var(--radius-sm);padding:12px 20px;font-family:var(--font);font-size:13.5px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;width:100%}
+.btn-google:hover{background:rgba(255,255,255,.14)}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:var(--radius-sm);font-family:var(--font);font-size:13.5px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;padding:10px 16px}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-dark);transform:translateY(-1px);box-shadow:0 4px 14px rgba(255,95,109,.35)}
+.btn-primary:active{transform:translateY(0)}
+.btn-secondary{background:var(--ink-05);color:var(--ink-60);border:1px solid var(--ink-20)}
+.btn-secondary:hover{background:var(--ink-10);color:var(--ink)}
+.btn-danger{background:#ef4444;color:#fff}
+.btn-danger:hover{background:#dc2626}
+.btn-sm{padding:7px 12px;font-size:12.5px}
+.btn-xs{padding:5px 9px;font-size:11.5px}
+.btn-icon{background:none;border:none;cursor:pointer;padding:6px;border-radius:6px;font-size:15px;color:var(--ink-40);transition:all .15s}
+.btn-icon:hover{background:var(--ink-10);color:var(--ink)}
+.w-full{width:100%}
+/* LAYOUT */
+#app{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-w);background:var(--ink);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:200;overflow:hidden;transition:transform .3s ease}
+.sidebar-header{padding:20px 16px 16px;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0}
+.sidebar-brand{display:flex;align-items:center;gap:10px}
+.sidebar-logo-wrap{width:34px;height:34px;background:var(--accent);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sidebar-name{color:#fff;font-size:16px;font-weight:800;letter-spacing:-.3px}
+.sidebar-name span{color:var(--accent)}
+.sidebar-centre{color:rgba(255,255,255,.28);font-size:10.5px;margin-top:1px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px}
+.sidebar-nav{flex:1;padding:12px 8px;display:flex;flex-direction:column;gap:1px;overflow-y:auto}
+.nav-label{font-size:9.5px;font-weight:700;color:rgba(255,255,255,.2);text-transform:uppercase;letter-spacing:.8px;padding:10px 10px 4px}
+.nav-item{display:flex;align-items:center;gap:9px;color:rgba(255,255,255,.45);background:none;border:none;border-radius:var(--radius-sm);padding:9px 10px;font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;text-align:left;width:100%}
+.nav-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.85)}
+.nav-item.active{background:rgba(255,95,109,.16);color:#fff;font-weight:600}
+.nav-icon{font-size:16px;flex-shrink:0}
+.sidebar-footer{padding:12px;border-top:1px solid rgba(255,255,255,.07);flex-shrink:0}
+.user-card{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--radius-sm);transition:background .15s;cursor:pointer}
+.user-card:hover{background:rgba(255,255,255,.05)}
+.u-avatar{width:32px;height:32px;border-radius:50%;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.u-name{color:#fff;font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.u-role{color:rgba(255,255,255,.32);font-size:10.5px;margin-top:1px}
+.btn-logout{background:none;border:none;cursor:pointer;color:rgba(255,255,255,.28);font-size:15px;padding:4px;border-radius:5px;transition:all .15s;margin-left:auto}
+.btn-logout:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.08)}
+#mobileBar{display:none;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--white);border-bottom:1px solid var(--ink-10);position:sticky;top:0;z-index:150}
+.mobile-brand{font-size:16px;font-weight:800;color:var(--ink)}
+.mobile-brand span{color:var(--accent)}
+#sidebarOverlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:199}
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.top-bar{background:var(--white);border-bottom:1px solid var(--ink-10);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:13.5px}
+.bc-cur{font-weight:700;color:var(--ink)}
+.top-right{display:flex;align-items:center;gap:8px}
+.top-search{background:var(--ink-05);border:1px solid var(--ink-10);border-radius:var(--radius-sm);padding:7px 12px;font-size:13px;font-family:var(--font);color:var(--ink);outline:none;width:180px;transition:all .2s}
+.top-search:focus{border-color:var(--accent);width:220px}
+.page{padding:24px 28px;flex:1;animation:fadeIn .2s ease}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:12px;flex-wrap:wrap}
+.page-title{font-size:24px;font-weight:800;color:var(--ink);letter-spacing:-.5px;line-height:1.1}
+.page-sub{color:var(--ink-40);font-size:13px;margin-top:4px}
+.page-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+/* CARDS */
+.card{background:var(--white);border:1px solid var(--ink-10);border-radius:var(--radius);padding:20px}
+.card-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.card-title span{font-size:12.5px;font-weight:500;color:var(--ink-40)}
+.stat-card{background:var(--white);border:1px solid var(--ink-10);border-radius:var(--radius);padding:18px;position:relative;overflow:hidden;transition:all .2s}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.stat-card:nth-child(1)::before{background:linear-gradient(90deg,var(--accent),#ff8f9d)}
+.stat-card:nth-child(2)::before{background:linear-gradient(90deg,var(--teal),#5ee7d0)}
+.stat-card:nth-child(3)::before{background:linear-gradient(90deg,var(--purple),#a78bfa)}
+.stat-card:nth-child(4)::before{background:linear-gradient(90deg,var(--amber),#fcd34d)}
+.stat-card:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+.stat-icon{font-size:22px;margin-bottom:8px}
+.stat-val{font-size:28px;font-weight:800;color:var(--ink);letter-spacing:-1px}
+.stat-label{font-size:12px;color:var(--ink-40);margin-top:2px}
+.module-card{background:var(--white);border:1px solid var(--ink-10);border-radius:var(--radius);padding:18px;display:flex;align-items:flex-start;gap:14px;transition:all .2s}
+.module-card:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+.module-icon-wrap{width:44px;height:44px;border-radius:10px;background:var(--ink-05);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.module-name{font-size:14px;font-weight:700;color:var(--ink)}
+.module-desc{font-size:12px;color:var(--ink-40);margin-top:3px;line-height:1.4}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+/* TABLE */
+.table-wrap{background:var(--white);border:1px solid var(--ink-10);border-radius:var(--radius);overflow:hidden}
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{padding:11px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--ink-40);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--ink-10);background:var(--ink-05)}
+.data-table td{padding:11px 14px;font-size:13px;color:var(--ink-60);border-bottom:1px solid var(--ink-05);transition:background .1s}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:var(--ink-05)}
+.td-main{display:flex;align-items:center;gap:9px}
+/* BADGES */
+.status-badge{font-size:11px;padding:3px 9px;border-radius:99px;font-weight:600;white-space:nowrap;display:inline-block}
+.badge-ok{background:var(--green-light);color:#065f46}
+.badge-warn{background:var(--amber-light);color:#92400e}
+.badge-alert{background:var(--accent-light);color:var(--accent-dark)}
+.badge-info{background:var(--blue-light);color:#1d4ed8}
+.badge-purple{background:var(--purple-light);color:#5b21b6}
+.badge-gray{background:var(--ink-10);color:var(--ink-60)}
+.role-chip{display:inline-flex;align-items:center;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700;border:1.5px solid}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,15,26,.55);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;animation:fadeIn .15s ease}
+.modal-box{background:var(--white);border-radius:var(--radius);padding:26px;width:100%;max-width:480px;box-shadow:var(--shadow-lg);animation:slideUp .2s ease;max-height:90vh;overflow-y:auto}
+.modal-sm{max-width:380px}.modal-lg{max-width:660px}
+.modal-title{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:18px;display:flex;align-items:center;justify-content:space-between}
+.modal-close{background:none;border:none;cursor:pointer;color:var(--ink-40);font-size:17px;padding:4px;border-radius:6px;transition:all .15s}
+.modal-close:hover{background:var(--ink-05);color:var(--ink)}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+/* FORMS */
+.form-group{margin-bottom:14px}
+.form-label{font-size:11px;font-weight:700;color:var(--ink-60);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.4px}
+.form-input{width:100%;border:1px solid var(--ink-20);border-radius:var(--radius-sm);padding:10px 13px;font-size:13.5px;font-family:var(--font);color:var(--ink);outline:none;transition:all .2s;background:var(--white)}
+.form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,95,109,.1)}
+.form-select{width:100%;border:1px solid var(--ink-20);border-radius:var(--radius-sm);padding:10px 13px;font-size:13.5px;font-family:var(--font);color:var(--ink);outline:none;background:var(--white);cursor:pointer;transition:border-color .2s}
+.form-select:focus{border-color:var(--accent)}
+.form-textarea{width:100%;border:1px solid var(--ink-20);border-radius:var(--radius-sm);padding:10px 13px;font-size:13.5px;font-family:var(--font);color:var(--ink);outline:none;resize:vertical;min-height:90px;line-height:1.6;transition:all .2s}
+.form-textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,95,109,.1)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+/* TABS */
+.tabs{display:flex;gap:3px;background:var(--ink-05);border-radius:var(--radius-sm);padding:3px;width:fit-content;margin-bottom:18px;flex-wrap:wrap}
+.tab-btn{padding:7px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink-40);background:none;border:none;font-family:var(--font);transition:all .15s;white-space:nowrap}
+.tab-btn:hover{color:var(--ink)}
+.tab-btn.active{background:var(--white);color:var(--ink);box-shadow:0 1px 4px rgba(15,15,26,.1)}
+.tab-panel{animation:fadeIn .15s ease}
+/* TOGGLE */
+.toggle{width:38px;height:20px;border-radius:99px;background:var(--ink-20);border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:var(--white);transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle.on{background:var(--accent)}
+.toggle.on::after{transform:translateX(18px)}
+/* NOTIFICACIONS */
+.notif-panel{position:fixed;top:60px;right:16px;width:320px;background:var(--white);border:1px solid var(--ink-10);border-radius:var(--radius);box-shadow:var(--shadow-lg);z-index:500;animation:slideUp .2s ease}
+.notif-header{padding:12px 14px;border-bottom:1px solid var(--ink-10);display:flex;align-items:center;justify-content:space-between}
+.notif-list{max-height:380px;overflow-y:auto}
+.notif-item{padding:11px 14px;border-bottom:1px solid var(--ink-05);cursor:pointer;transition:background .15s;display:flex;gap:10px}
+.notif-item:hover{background:var(--ink-05)}
+.notif-item.unread{background:var(--accent-light)}
+.notif-icon{font-size:18px;flex-shrink:0}
+.notif-text{font-size:12.5px;color:var(--ink-60);line-height:1.5}
+.notif-time{font-size:10.5px;color:var(--ink-20);margin-top:3px}
+/* TOAST */
+.g-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;z-index:9999;animation:slideUp .2s ease;pointer-events:none;display:flex;align-items:center;gap:8px;transition:opacity .4s,transform .4s}
+.g-toast.success{background:#065f46}
+.g-toast.error{background:#991b1b}
+.g-toast.warn{background:#92400e}
+/* SPINNER */
+.g-spinner{width:28px;height:28px;border:3px solid var(--ink-10);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:auto}
+/* EMPTY */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;color:var(--ink-40);text-align:center}
+.empty-icon{font-size:48px;margin-bottom:14px;opacity:.4}
+.empty-title{font-size:17px;font-weight:700;color:var(--ink-40);margin-bottom:6px}
+.empty-sub{font-size:13px;color:var(--ink-20)}
+/* GUARD */
+.guard-slot{background:var(--white);border:1px solid var(--ink-10);border-radius:var(--radius-sm);padding:12px 14px;display:flex;align-items:center;gap:10px;transition:all .15s}
+.guard-slot.ok{border-left:3px solid var(--green)}
+.guard-slot.alert{border-left:3px solid var(--accent)}
+.guard-slot.warn{border-left:3px solid var(--amber)}
+/* LLISTA */
+.llista-row{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:var(--radius-sm);transition:background .1s}
+.llista-row:hover{background:var(--ink-05)}
+.present-btn{width:32px;height:32px;border-radius:50%;border:2px solid var(--ink-20);background:none;cursor:pointer;font-size:13px;font-weight:700;transition:all .15s;display:flex;align-items:center;justify-content:center;font-family:var(--font)}
+.present-btn.present{background:var(--green);border-color:var(--green);color:#fff}
+.present-btn.absent{background:var(--accent);border-color:var(--accent);color:#fff}
+.present-btn.retard{background:var(--amber);border-color:var(--amber);color:#fff}
+.present-btn.justif{background:var(--blue);border-color:var(--blue);color:#fff}
+/* EXCEL */
+.drop-zone{border:2px dashed var(--ink-20);border-radius:var(--radius);padding:32px;text-align:center;color:var(--ink-40);transition:all .2s;cursor:pointer}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--accent);background:var(--accent-light);color:var(--accent-dark)}
+.drop-icon{font-size:36px;margin-bottom:10px}
+.excel-preview{border:1px solid var(--ink-10);border-radius:var(--radius-sm);overflow:auto;max-height:320px}
+.excel-table{width:100%;border-collapse:collapse}
+.excel-table th{padding:7px 10px;background:var(--ink-05);border:1px solid var(--ink-10);font-size:12px;font-weight:700;color:var(--ink-60);white-space:nowrap}
+.excel-table td{padding:6px 10px;border:1px solid var(--ink-05);font-size:12px;color:var(--ink-60)}
+.excel-table tr.selected td{background:var(--accent-light)}
+.excel-table tr:hover td{background:var(--ink-05)}
+.row-checkbox{accent-color:var(--accent);cursor:pointer;width:14px;height:14px}
+/* MISSATGERIA */
+.msg-item{padding:11px 14px;border-bottom:1px solid var(--ink-05);cursor:pointer;transition:background .15s}
+.msg-item:hover{background:var(--ink-05)}
+.msg-item.msg-unread{background:var(--accent-light)}
+/* RESPONSIVE */
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0);box-shadow:var(--shadow-lg)}
+  .main{margin-left:0}
+  #mobileBar{display:flex}
+  .page{padding:16px}
+  .grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
+  .form-row{grid-template-columns:1fr}
+  .page-header{flex-direction:column;align-items:flex-start}
+  .tabs{overflow-x:auto}
+  .top-search{width:140px}
+}
+@media(max-width:480px){.modal-box{padding:18px}}
+</style>
 </head>
 <body>
 
-<!-- ═══ LOADING ═══ -->
+<!-- LOADING -->
 <div id="loadingScreen">
   <div class="loading-logo">🌿</div>
   <div class="loading-brand">Gesti<span>ona</span></div>
@@ -17,7 +246,7 @@
   <div class="loading-bar"><div class="loading-bar-fill"></div></div>
 </div>
 
-<!-- ═══ LOGIN ═══ -->
+<!-- LOGIN -->
 <div id="loginScreen" class="hidden">
   <div class="login-card">
     <div class="login-logo">
@@ -30,18 +259,16 @@
       <div class="field-wrap">
         <span class="field-icon">✉</span>
         <input class="login-input" type="email" placeholder="Correu electrònic" id="loginEmail"
-          onkeydown="if(event.key==='Enter')window.doLogin?.()">
+          onkeydown="if(event.key==='Enter')doLogin()">
       </div>
       <div class="field-wrap">
         <span class="field-icon">🔒</span>
         <input class="login-input" type="password" placeholder="Contrasenya" id="loginPass"
-          onkeydown="if(event.key==='Enter')window.doLogin?.()">
+          onkeydown="if(event.key==='Enter')doLogin()">
       </div>
-      <button class="btn btn-primary w-full" id="btnLogin" onclick="window.doLogin?.()">
-        Entrar a Gestiona
-      </button>
+      <button class="btn btn-primary w-full" id="btnLogin" onclick="doLogin()">Entrar a Gestiona</button>
       <div class="login-divider">o</div>
-      <button class="btn-google" onclick="window.doLoginGoogle?.()">
+      <button class="btn-google" onclick="doLoginGoogle()">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
           <path d="M17.64 9.2a10.34 10.34 0 0 0-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92a8.78 8.78 0 0 0 2.68-6.62z" fill="#4285F4"/>
           <path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.26a5.4 5.4 0 0 1-8.05-2.84H.96v2.33A9 9 0 0 0 9 18z" fill="#34A853"/>
@@ -58,111 +285,85 @@
   </div>
 </div>
 
-<!-- ═══ APP SHELL ═══ -->
+<!-- APP -->
 <div id="app" class="hidden">
-
-  <!-- Barra mòbil -->
   <div id="mobileBar">
-    <button id="btnMobileMenu" aria-label="Menú">☰</button>
+    <button id="btnMobileMenu" style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--ink)">☰</button>
     <span class="mobile-brand">Gesti<span>ona</span></span>
-    <button class="btn-icon" onclick="document.getElementById('notifPanel').classList.toggle('hidden')">🔔</button>
+    <button class="btn-icon" onclick="toggleNotifPanel()">🔔</button>
   </div>
 
-  <!-- Sidebar -->
   <nav class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <div class="sidebar-brand">
         <div class="sidebar-logo-wrap">🌿</div>
         <div>
           <div class="sidebar-name">Gesti<span>ona</span></div>
-          <div class="sidebar-centre" id="sidebarCentre">Carregant...</div>
+          <div class="sidebar-centre" id="sidebarCentre">—</div>
         </div>
       </div>
     </div>
-    <div class="sidebar-nav" id="sidebarNav">
-      <!-- Omplert per router.js -->
-    </div>
+    <div class="sidebar-nav" id="sidebarNav"></div>
     <div class="sidebar-footer">
-      <div class="user-card" onclick="window.navigate?.('perfil')">
+      <div class="user-card" onclick="navigate('perfil')">
         <div class="u-avatar" id="uAvatar" style="background:var(--accent)">?</div>
         <div style="flex:1;overflow:hidden">
           <div class="u-name" id="uName">—</div>
           <div class="u-role" id="uRole">—</div>
         </div>
-        <button class="btn-logout" onclick="event.stopPropagation();window.doLogout?.()" title="Tanca sessió">↩</button>
+        <button class="btn-logout" onclick="event.stopPropagation();doLogout()" title="Tanca sessió">↩</button>
       </div>
     </div>
   </nav>
 
-  <!-- Overlay mòbil -->
-  <div id="sidebarOverlay" class="hidden"></div>
+  <div id="sidebarOverlay" class="hidden" onclick="closeSidebar()"></div>
 
-  <!-- Contingut principal -->
   <div class="main">
     <div class="top-bar">
-      <div class="breadcrumb" id="breadcrumb">
-        <span class="bc-cur">Inici</span>
-      </div>
+      <div class="breadcrumb"><span class="bc-cur" id="breadcrumb">Inici</span></div>
       <div class="top-right">
         <input class="top-search" type="text" placeholder="🔍 Cerca..." id="globalSearch"
           oninput="document.querySelectorAll('.data-table tbody tr').forEach(tr=>{tr.style.display=tr.textContent.toLowerCase().includes(this.value.toLowerCase())||!this.value?'':'none'})">
-        <button class="btn-icon" id="notifBtn"
-          onclick="document.getElementById('notifPanel').classList.toggle('hidden')" title="Notificacions">
-          🔔
-        </button>
+        <div style="position:relative">
+          <button class="btn-icon" id="notifBtn" onclick="toggleNotifPanel()">🔔</button>
+          <span id="notifBadge" class="hidden" style="position:absolute;top:4px;right:4px;width:8px;height:8px;background:var(--accent);border-radius:50%;border:2px solid var(--white)"></span>
+        </div>
       </div>
     </div>
-
-    <!-- Pàgina renderitzada dinàmicament -->
     <div id="pageContainer" class="page"></div>
   </div>
 </div>
 
-<!-- ═══ PANELL NOTIFICACIONS ═══ -->
+<!-- NOTIFICACIONS -->
 <div class="notif-panel hidden" id="notifPanel">
   <div class="notif-header">
     <span style="font-size:13.5px;font-weight:700;color:var(--ink)">Notificacions</span>
-    <span style="font-size:12px;color:var(--accent);cursor:pointer;font-weight:600"
-      onclick="window._markAllNotifRead?.()">Marcar totes</span>
+    <span style="font-size:12px;color:var(--accent);cursor:pointer;font-weight:600" onclick="markAllNotifRead()">Marcar totes</span>
   </div>
   <div class="notif-list" id="notifList">
     <div style="padding:20px;text-align:center;color:var(--ink-40);font-size:13px">Cap notificació</div>
   </div>
 </div>
 
-<!-- ═══ MODALS GLOBALS ═══ -->
+<!-- MODALS GLOBALS -->
 <div id="legalModal" class="modal-overlay hidden">
   <div class="modal-box modal-sm">
-    <div class="modal-title">Avís Legal
-      <button class="modal-close" onclick="hideModal('legalModal')">✕</button>
-    </div>
-    <p style="font-size:13px;color:var(--ink-60);line-height:1.7">
-      L'accés a l'aplicació implica l'acceptació dels termes d'ús conforme la Llei orgànica 3/2018
-      (LOPDGDD) i el Reglament (UE) 2016/679 (RGPD). Les dades es tracten de manera confidencial
-      i no es cedeixen a tercers.
-    </p>
-    <div class="modal-actions">
-      <button class="btn btn-primary" onclick="hideModal('legalModal')">Entès</button>
-    </div>
+    <div class="modal-title">Avís Legal <button class="modal-close" onclick="hideModal('legalModal')">✕</button></div>
+    <p style="font-size:13px;color:var(--ink-60);line-height:1.7">L'accés implica l'acceptació dels termes conforme la LOPDGDD i el RGPD. Les dades es tracten de manera confidencial.</p>
+    <div class="modal-actions"><button class="btn btn-primary" onclick="hideModal('legalModal')">Entès</button></div>
   </div>
 </div>
-
 <div id="resetModal" class="modal-overlay hidden">
   <div class="modal-box modal-sm">
-    <div class="modal-title">Recuperar contrasenya
-      <button class="modal-close" onclick="hideModal('resetModal')">✕</button>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Correu electrònic</label>
-      <input class="form-input" type="email" id="resetEmail" placeholder="correu@centre.cat">
-    </div>
+    <div class="modal-title">Recuperar contrasenya <button class="modal-close" onclick="hideModal('resetModal')">✕</button></div>
+    <div class="form-group"><label class="form-label">Correu electrònic</label>
+      <input class="form-input" type="email" id="resetEmail" placeholder="correu@centre.cat"></div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="hideModal('resetModal')">Cancel·lar</button>
-      <button class="btn btn-primary" onclick="window.doResetPassword?.()">Enviar correu</button>
+      <button class="btn btn-primary" onclick="doResetPassword()">Enviar correu</button>
     </div>
   </div>
 </div>
-
 <div id="confirmModal" class="modal-overlay hidden">
   <div class="modal-box modal-sm">
     <div class="modal-title" id="confirmTitle">Confirmar acció</div>
@@ -174,191 +375,1261 @@
   </div>
 </div>
 
-<!-- ═══ APP ENTRY POINT ═══ -->
-<script type="module">
-// ── Firebase imports ──
-import { initializeApp }            from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getAuth, signInWithEmailAndPassword, signInWithPopup,
-         GoogleAuthProvider, signOut, onAuthStateChanged,
-         sendPasswordResetEmail }   from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getDatabase, ref, set, get, push, update, remove,
-         onValue, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+<!-- FIREBASE SDKs (UMD — funcionen sense servidor) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
-// ── App modules ──
-import { FB_CONFIG, G }            from './firebase-config.js';
-import { initAuth, listenAuth }    from './auth.js';
-import { showToast, showModal, hideModal, initTabs } from './ui.js';
-import { registerModule, buildSidebar, navigate, initMobileMenu } from './router.js';
-
-// ── Mòduls de pàgina (un fitxer per mòdul) ──
-import { initAdminModule,      renderAdmin,       bindAdmin,
-         renderUsuaris,        bindUsuaris }       from './admin.js';
-import { initSecretariaModule, renderSecretaria,  bindSecretaria }  from './secretaria.js';
-import { initAbsenciesModule,  renderAbsencies,   bindAbsencies }   from './absencies.js';
-import { initDashboardModule,  renderDashboard,   bindDashboard }   from './dashboard.js';
-import { initClassesModule,    renderClasses,     bindClasses }     from './classes.js';
-import { initGuardiesModule,   renderGuardies,    bindGuardies }    from './guardies.js';
-import { initLlistaModule,     renderLlista,      bindLlista }      from './llista.js';
-import { initMissateriaModule, renderMissatgeria, bindMissatgeria } from './missatgeria.js';
-import { initCalendariModule,  renderCalendari,   bindCalendari }   from './calendari.js';
-import { initAvaluacionsModule,renderAvaluacions, bindAvaluacions } from './avaluacions.js';
-import { initPagamentsModule,  renderPagaments,   bindPagaments }   from './pagaments.js';
-import { initIndicadorsModule, renderIndicadors,  bindIndicadors }  from './indicadors.js';
-import { initEspaisModule,     renderEspais,      bindEspais }      from './espais.js';
-import { initPerfilModule,     renderPerfil,      bindPerfil }      from './perfil.js';
-
-// ══════════════════════════════
-//  INICIALITZACIÓ FIREBASE
-// ══════════════════════════════
-const fbApp = initializeApp(FB_CONFIG);
-const auth  = getAuth(fbApp);
-const db    = getDatabase(fbApp);
-
-const fbFns = {
-  ref, set, get, push, update, remove, onValue, serverTimestamp,
-  onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup,
-  GoogleAuthProvider, signOut, sendPasswordResetEmail,
+<script>
+'use strict';
+// ══════════════════════════════════════════
+//  CONFIGURACIÓ I CONSTANTS GLOBALS
+// ══════════════════════════════════════════
+const FB_CONFIG = {
+  apiKey: "AIzaSyBF7P-Soao-ZSams3JceNVRYpr5tNs_RIs",
+  authDomain: "campeonato-82be4.firebaseapp.com",
+  databaseURL: "https://campeonato-82be4-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "campeonato-82be4"
 };
 
-// ── Inicialitza tots els mòduls (cadascun amb les seves dependències) ──
-initAuth(auth, db, fbFns);
-initDashboardModule(db, fbFns);
-initAdminModule(db, fbFns);
-initSecretariaModule(db, fbFns);
-initAbsenciesModule(db, fbFns);
-initClassesModule(db, fbFns);
-initGuardiesModule(db, fbFns);
-initLlistaModule(db, fbFns);
-initMissateriaModule(db, fbFns);
-initCalendariModule(db, fbFns);
-initAvaluacionsModule(db, fbFns);
-initPagamentsModule(db, fbFns);
-initIndicadorsModule(db, fbFns);
-initEspaisModule(db, fbFns);
-initPerfilModule(db, fbFns);
+const MODULES_DEF = {
+  secretaria:  { label:'Secretaria',        icon:'🗂️', desc:'Alumnes, grups i importació CSV',      nav:'Gestió',          defaultOn:true  },
+  classes:     { label:'Classes & Horaris', icon:'📚', desc:'Classes, assignatures i horaris',      nav:'Gestió',          defaultOn:true  },
+  absencies:   { label:'Absències',         icon:'📋', desc:'Absències professors',                 nav:'Professorat',     defaultOn:true  },
+  llista:      { label:'Passar llista',     icon:'✅', desc:'Assistència d\'alumnes per classe',    nav:'Professorat',     defaultOn:true  },
+  guardies:    { label:'Guàrdies',          icon:'🛡️', desc:'Assignació de guàrdies',               nav:'Professorat',     defaultOn:true  },
+  missatgeria: { label:'Missatgeria',       icon:'✉️', desc:'Comunicació interna',                  nav:'Comunicació',     defaultOn:true  },
+  calendari:   { label:'Calendari',         icon:'📅', desc:'Events i dates clau',                  nav:'Comunicació',     defaultOn:true  },
+  avaluacions: { label:'Avaluacions',       icon:'📊', desc:'Notes i qualificacions',               nav:'Acadèmic',        defaultOn:true  },
+  pagaments:   { label:'Pagaments',         icon:'💳', desc:'Control econòmic i quotes',            nav:'Acadèmic',        defaultOn:false },
+  indicadors:  { label:'Indicadors',        icon:'📈', desc:'Estadístiques i KPIs',                 nav:'Acadèmic',        defaultOn:true  },
+  espais:      { label:'Espais',            icon:'🏫', desc:'Reserva d\'espais',                    nav:'Infraestructura', defaultOn:false },
+};
 
-// ── Registra cada pàgina al router ──
-registerModule('dashboard',   { render: renderDashboard,   bind: bindDashboard   });
-registerModule('admin',       { render: renderAdmin,        bind: bindAdmin       });
-registerModule('usuaris',     { render: renderUsuaris,      bind: bindUsuaris     });
-registerModule('secretaria',  { render: renderSecretaria,   bind: bindSecretaria  });
-registerModule('classes',     { render: renderClasses,      bind: bindClasses     });
-registerModule('absencies',   { render: renderAbsencies,    bind: bindAbsencies   });
-registerModule('llista',      { render: renderLlista,       bind: bindLlista      });
-registerModule('guardies',    { render: renderGuardies,     bind: bindGuardies    });
-registerModule('missatgeria', { render: renderMissatgeria,  bind: bindMissatgeria });
-registerModule('calendari',   { render: renderCalendari,    bind: bindCalendari   });
-registerModule('avaluacions', { render: renderAvaluacions,  bind: bindAvaluacions });
-registerModule('pagaments',   { render: renderPagaments,    bind: bindPagaments   });
-registerModule('indicadors',  { render: renderIndicadors,   bind: bindIndicadors  });
-registerModule('espais',      { render: renderEspais,       bind: bindEspais      });
-registerModule('perfil',      { render: renderPerfil,       bind: bindPerfil      });
+const ROLES_DEF = {
+  admin:       { label:'Administrador',  color:'#ff5f6d', modules:'*' },
+  director:    { label:'Director/a',     color:'#7c3aed', modules:['secretaria','classes','absencies','llista','guardies','missatgeria','calendari','avaluacions','pagaments','indicadors','espais'] },
+  cap_estudis: { label:'Cap d\'estudis', color:'#00b4a0', modules:['classes','absencies','llista','guardies','missatgeria','calendari','avaluacions','indicadors','espais'] },
+  secretari:   { label:'Secretari/a',   color:'#f59e0b', modules:['secretaria','missatgeria','pagaments','calendari'] },
+  professor:   { label:'Professor/a',   color:'#3b82f6', modules:['absencies','llista','missatgeria','calendari','avaluacions'] },
+  tutor:       { label:'Tutor/a',       color:'#10b981', modules:['absencies','llista','missatgeria','calendari','avaluacions'] },
+};
 
-// ══════════════════════════════
-//  ESCOLTA CANVIS D'AUTENTICACIÓ
-// ══════════════════════════════
-listenAuth(
-  // onLogin
-  async (user) => {
-    document.getElementById('loadingScreen').style.cssText = 'opacity:0;pointer-events:none';
-    setTimeout(() => document.getElementById('loadingScreen').classList.add('hidden'), 400);
+const BCMAP = {
+  dashboard:'Inici', admin:'Panell Admin', usuaris:'Usuaris i Rols',
+  secretaria:'Secretaria', classes:'Classes & Horaris', absencies:'Absències',
+  llista:'Passar llista', guardies:'Guàrdies', missatgeria:'Missatgeria',
+  calendari:'Calendari', avaluacions:'Avaluacions', pagaments:'Pagaments',
+  indicadors:'Indicadors', espais:'Espais', perfil:'El meu perfil',
+};
+
+// Estat global
+const G = { user:null, profile:null, modules:{}, activeModules:[], notifs:[], unsubs:[] };
+
+// ══════════════════════════════════════════
+//  FIREBASE INIT
+// ══════════════════════════════════════════
+firebase.initializeApp(FB_CONFIG);
+const auth = firebase.auth();
+const db   = firebase.database();
+const ref  = (path) => db.ref(path);
+
+// ══════════════════════════════════════════
+//  UI HELPERS
+// ══════════════════════════════════════════
+function showToast(msg, type='') {
+  document.querySelectorAll('.g-toast').forEach(t=>t.remove());
+  const t = document.createElement('div');
+  t.className = 'g-toast' + (type?' '+type:'');
+  t.innerHTML = ({success:'✅ ',error:'❌ ',warn:'⚠️ '}[type]||'ℹ️ ') + msg;
+  document.body.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(8px)'},2600);
+  setTimeout(()=>t.remove(),3100);
+}
+function showModal(id)  { document.getElementById(id)?.classList.remove('hidden'); }
+function hideModal(id)  { document.getElementById(id)?.classList.add('hidden'); }
+function showConfirm(title, msg, cb) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMsg').textContent   = msg;
+  document.getElementById('confirmOkBtn').onclick = ()=>{ hideModal('confirmModal'); cb(); };
+  showModal('confirmModal');
+}
+function openDynModal(id, html) {
+  let m = document.getElementById(id);
+  if (!m) { m=document.createElement('div'); m.id=id; m.className='modal-overlay hidden'; document.body.appendChild(m); }
+  m.innerHTML = html;
+  m.classList.remove('hidden');
+}
+function initTabs(container) {
+  container.querySelectorAll('.tabs .tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tid = btn.dataset.tab;
+      btn.closest('.tabs').querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      container.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('hidden', p.id!==tid));
+    });
+  });
+  container.querySelector('.tabs .tab-btn')?.click();
+}
+function badge(text, type='gray') {
+  return `<span class="status-badge badge-${type}">${text}</span>`;
+}
+function avatar(text, color='var(--ink-20)', size='sm') {
+  const s={xs:'24px',sm:'30px',md:'36px',lg:'48px'}[size]||'30px';
+  const f={xs:'10px',sm:'12px',md:'13px',lg:'18px'}[size]||'12px';
+  return `<div style="width:${s};height:${s};border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:${f};font-weight:700;color:#fff;flex-shrink:0">${text}</div>`;
+}
+function initials(nom='') { return nom.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase()||'?'; }
+function spinner() { return `<div style="display:flex;align-items:center;justify-content:center;height:200px"><div class="g-spinner"></div></div>`; }
+function exportCSV(rows, filename) {
+  const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url);
+}
+function today() { return new Date().toISOString().split('T')[0]; }
+
+// ══════════════════════════════════════════
+//  ROUTER
+// ══════════════════════════════════════════
+const MODULE_REGISTRY = {};
+function registerModule(name, mod) { MODULE_REGISTRY[name] = mod; }
+
+async function navigate(page, params={}) {
+  G.currentPage = page;
+  document.querySelectorAll('.nav-item[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+  const bcEl = document.getElementById('breadcrumb');
+  if (bcEl) bcEl.textContent = BCMAP[page]||page;
+  document.getElementById('notifPanel')?.classList.add('hidden');
+  // Tanca sidebar mòbil
+  document.getElementById('sidebar')?.classList.remove('open');
+  document.getElementById('sidebarOverlay')?.classList.add('hidden');
+
+  const container = document.getElementById('pageContainer');
+  container.innerHTML = spinner();
+  try {
+    const mod = MODULE_REGISTRY[page];
+    if (!mod) { container.innerHTML=`<div class="empty-state"><div class="empty-icon">🚧</div><div class="empty-title">Mòdul no disponible</div></div>`; return; }
+    container.innerHTML = await mod.render(params);
+    if (mod.bind) await mod.bind(params);
+  } catch(e) {
+    console.error(e);
+    container.innerHTML=`<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Error</div><div class="empty-sub">${e.message}</div></div>`;
+  }
+}
+
+function buildSidebar(centreNom='') {
+  const rol = G.profile?.rol||'professor';
+  const isAdmin = rol==='admin';
+  let html='';
+  if (isAdmin) {
+    html+=`<div class="nav-label">Administració</div>
+    <button class="nav-item" data-page="admin"><span class="nav-icon">⚙️</span> Panell Admin</button>
+    <button class="nav-item" data-page="usuaris"><span class="nav-icon">👥</span> Usuaris i Rols</button>`;
+  }
+  const groups={};
+  G.activeModules.forEach(m=>{
+    const def=MODULES_DEF[m]; if(!def) return;
+    if(!groups[def.nav]) groups[def.nav]=[];
+    groups[def.nav].push(m);
+  });
+  Object.entries(groups).forEach(([grp,mods])=>{
+    html+=`<div class="nav-label">${grp}</div>`;
+    mods.forEach(m=>{
+      const def=MODULES_DEF[m];
+      html+=`<button class="nav-item" data-page="${m}"><span class="nav-icon">${def.icon}</span> ${def.label}</button>`;
+    });
+  });
+  html+=`<div class="nav-label">Compte</div>
+  <button class="nav-item" data-page="perfil"><span class="nav-icon">👤</span> El meu perfil</button>`;
+  const nav=document.getElementById('sidebarNav');
+  if (nav) nav.innerHTML=html;
+  document.querySelectorAll('.nav-item[data-page]').forEach(btn=>{
+    btn.addEventListener('click',()=>navigate(btn.dataset.page));
+  });
+  const cEl=document.getElementById('sidebarCentre');
+  if (cEl) cEl.textContent=centreNom||'Gestiona';
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar')?.classList.remove('open');
+  document.getElementById('sidebarOverlay')?.classList.add('hidden');
+}
+
+// ══════════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════════
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPass').value;
+  if (!email||!pass) { showLoginError('Introdueix correu i contrasenya'); return; }
+  const btn = document.getElementById('btnLogin');
+  btn.textContent='Entrant...'; btn.disabled=true;
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+  } catch(e) {
+    showLoginError(friendlyErr(e.code));
+    btn.textContent='Entrar a Gestiona'; btn.disabled=false;
+  }
+}
+async function doLoginGoogle() {
+  try { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
+  catch(e) { showLoginError('Error Google: '+e.message); }
+}
+async function doLogout() {
+  G.unsubs.forEach(u=>u&&u()); G.unsubs=[];
+  await auth.signOut();
+}
+async function doResetPassword() {
+  const email = document.getElementById('resetEmail').value.trim();
+  if (!email) { showToast('Introdueix el correu','error'); return; }
+  try { await auth.sendPasswordResetEmail(email); hideModal('resetModal'); showToast('Correu enviat!','success'); }
+  catch(e) { showToast('Error: '+e.message,'error'); }
+}
+function showLoginError(msg) {
+  const el=document.getElementById('loginError');
+  el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),4500);
+}
+function friendlyErr(code) {
+  return {'auth/user-not-found':'Usuari no trobat','auth/wrong-password':'Contrasenya incorrecta',
+    'auth/invalid-email':'Correu invàlid','auth/invalid-credential':'Credencials incorrectes',
+    'auth/too-many-requests':'Massa intents, espera uns minuts','auth/email-already-in-use':'Correu ja registrat'}[code]||code;
+}
+
+async function loadUserProfile(user) {
+  const snap = await db.ref(`gestiona/users/${user.uid}`).once('value');
+  if (snap.exists()) {
+    G.profile = snap.val();
+  } else {
+    const usersSnap = await db.ref('gestiona/users').once('value');
+    const isFirst   = !usersSnap.exists();
+    G.profile = { email:user.email, nom:user.displayName||user.email.split('@')[0], rol:isFirst?'admin':'professor', actiu:true, createdAt:Date.now() };
+    await db.ref(`gestiona/users/${user.uid}`).set(G.profile);
+    if (isFirst) await db.ref('gestiona/config/adminUid').set(user.uid);
+  }
+  const rolDef = ROLES_DEF[G.profile.rol]||{label:G.profile.rol,color:'#999'};
+  const ini    = initials(G.profile.nom);
+  const el     = document.getElementById('uName'); if(el) el.textContent=G.profile.nom;
+  const er     = document.getElementById('uRole'); if(er) er.textContent=rolDef.label;
+  const ea     = document.getElementById('uAvatar'); if(ea){ea.textContent=ini;ea.style.background=rolDef.color;}
+}
+
+async function loadModules() {
+  const snap = await db.ref('gestiona/config/modules').once('value');
+  if (snap.exists()) { G.modules=snap.val(); }
+  else {
+    G.modules={};
+    Object.entries(MODULES_DEF).forEach(([k,v])=>{ G.modules[k]=v.defaultOn; });
+    await db.ref('gestiona/config/modules').set(G.modules);
+  }
+  const rol     = G.profile?.rol||'professor';
+  const allowed = ROLES_DEF[rol]?.modules==='*'?Object.keys(MODULES_DEF):(ROLES_DEF[rol]?.modules||[]);
+  G.activeModules = Object.keys(G.modules).filter(m=>G.modules[m]&&(allowed.includes(m)||rol==='admin'));
+}
+
+async function createUserViaRest(email, password, profileData) {
+  const resp = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FB_CONFIG.apiKey}`,
+    {method:'POST',headers:{'Content-Type':'application/json'},
+     body:JSON.stringify({email,password,returnSecureToken:true})});
+  const data = await resp.json();
+  if (data.error) throw new Error(data.error.message);
+  await db.ref(`gestiona/users/${data.localId}`).set({...profileData,email,actiu:true,createdAt:Date.now(),createdBy:G.user?.uid});
+  return data.localId;
+}
+
+// ══════════════════════════════════════════
+//  ESCOLTA AUTH
+// ══════════════════════════════════════════
+auth.onAuthStateChanged(async user => {
+  if (user) {
+    G.user = user;
+    await loadUserProfile(user);
+    await loadModules();
+    // Amaga loading/login, mostra app
+    const ls = document.getElementById('loadingScreen');
+    ls.style.opacity='0'; setTimeout(()=>ls.classList.add('hidden'),400);
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
-
-    // Carrega nom del centre per al sidebar
-    const centreSnap = await get(ref(db, 'gestiona/config/centre'));
-    const centreNom  = centreSnap.exists() ? centreSnap.val().nom : '';
-
-    buildSidebar(centreNom);
-    initMobileMenu();
+    // Sidebar
+    const centreSnap = await db.ref('gestiona/config/centre').once('value');
+    buildSidebar(centreSnap.exists()?centreSnap.val().nom:'');
+    // Mobile menu
+    document.getElementById('btnMobileMenu')?.addEventListener('click',()=>{
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebarOverlay').classList.toggle('hidden');
+    });
     navigate('dashboard');
     initNotificacions(user.uid);
-
-    // Missatge de benvinguda si és primera vegada
-    setTimeout(async () => {
-      const nSnap = await get(ref(db, `gestiona/notifs/${user.uid}`));
-      if (!nSnap.exists()) {
-        await push(ref(db, `gestiona/notifs/${user.uid}`), {
-          icon: '🌿', text: 'Benvingut a Gestiona! Configura el centre des del Panell Admin.',
-          time: Date.now(), unread: true
-        });
+    // Notificació benvinguda
+    setTimeout(async()=>{
+      const ns = await db.ref(`gestiona/notifs/${user.uid}`).once('value');
+      if (!ns.exists()) {
+        await db.ref(`gestiona/notifs/${user.uid}`).push({icon:'🌿',text:'Benvingut a Gestiona! Configura el centre des del Panell Admin.',time:Date.now(),unread:true});
       }
-    }, 1500);
-  },
-  // onLogout
-  () => {
+    },1500);
+  } else {
+    G.user=null; G.profile=null;
     document.getElementById('loadingScreen').classList.add('hidden');
     document.getElementById('loginScreen').classList.remove('hidden');
     document.getElementById('app').classList.add('hidden');
-    const btn = document.getElementById('btnLogin');
-    if (btn) { btn.textContent = 'Entrar a Gestiona'; btn.disabled = false; }
-  }
-);
-
-// ══════════════════════════════
-//  NOTIFICACIONS EN TEMPS REAL
-// ══════════════════════════════
-function initNotificacions(uid) {
-  const unsub = onValue(ref(db, `gestiona/notifs/${uid}`), snap => {
-    G.notifs = snap.exists() ? Object.entries(snap.val()) : [];
-    const unread = G.notifs.filter(([, n]) => n.unread).length;
-    const btn = document.getElementById('notifBtn');
-    if (btn) btn.style.position = 'relative';
-
-    // Badge visual
-    let badge = document.getElementById('notifBadge');
-    if (unread > 0) {
-      if (!badge) {
-        badge = document.createElement('span');
-        badge.id = 'notifBadge';
-        badge.style.cssText = 'position:absolute;top:2px;right:2px;width:8px;height:8px;background:var(--accent);border-radius:50%;border:2px solid var(--white)';
-        btn?.appendChild(badge);
-      }
-    } else {
-      badge?.remove();
-    }
-    renderNotifList();
-  });
-  G.unsubs.push(unsub);
-
-  window._markAllNotifRead = async function () {
-    for (const [id] of G.notifs) {
-      await update(ref(db, `gestiona/notifs/${uid}/${id}`), { unread: false });
-    }
-  };
-}
-
-function renderNotifList() {
-  const list = document.getElementById('notifList');
-  if (!list) return;
-  list.innerHTML = G.notifs.slice(0, 12).map(([id, n]) => `
-    <div class="notif-item ${n.unread ? 'unread' : ''}"
-      onclick="markNotifRead('${id}')">
-      <div class="notif-icon">${n.icon || '🔔'}</div>
-      <div>
-        <div class="notif-text">${n.text}</div>
-        <div class="notif-time">${n.time ? new Date(n.time).toLocaleString('ca-ES') : ''}</div>
-      </div>
-    </div>`).join('') ||
-    '<div style="padding:20px;text-align:center;color:var(--ink-40);font-size:13px">Cap notificació</div>';
-}
-
-window.markNotifRead = function (id) {
-  if (!G.user) return;
-  update(ref(db, `gestiona/notifs/${G.user.uid}/${id}`), { unread: false });
-};
-
-// ── Tanca notificacions i modals en clicar fora ──
-document.addEventListener('click', e => {
-  if (e.target.classList.contains('modal-overlay')) e.target.classList.add('hidden');
-  if (!e.target.closest('#notifPanel') && !e.target.closest('#notifBtn')) {
-    document.getElementById('notifPanel')?.classList.add('hidden');
+    const btn=document.getElementById('btnLogin');
+    if(btn){btn.textContent='Entrar a Gestiona';btn.disabled=false;}
   }
 });
 
-console.log('🌿 Gestiona v2.0 modular — Sistema inicialitzat');
-console.log('📧 Usuari de proves: tonaco92@gmail.com / 12345678');
-console.log('ℹ️  El primer usuari del sistema rep automàticament el rol admin.');
+// ══════════════════════════════════════════
+//  NOTIFICACIONS
+// ══════════════════════════════════════════
+function initNotificacions(uid) {
+  const unsub = db.ref(`gestiona/notifs/${uid}`).on('value', snap=>{
+    G.notifs = snap.exists()?Object.entries(snap.val()):[];
+    const unread = G.notifs.filter(([,n])=>n.unread).length;
+    const badge  = document.getElementById('notifBadge');
+    if(badge) badge.classList.toggle('hidden',unread===0);
+    renderNotifList();
+  });
+  G.unsubs.push(()=>db.ref(`gestiona/notifs/${uid}`).off('value',unsub));
+}
+function renderNotifList() {
+  const list = document.getElementById('notifList'); if(!list) return;
+  list.innerHTML = G.notifs.slice(0,12).map(([id,n])=>`
+    <div class="notif-item${n.unread?' unread':''}" onclick="markNotifRead('${id}')">
+      <div class="notif-icon">${n.icon||'🔔'}</div>
+      <div><div class="notif-text">${n.text}</div>
+      <div class="notif-time">${n.time?new Date(n.time).toLocaleString('ca-ES'):''}</div></div>
+    </div>`).join('')||'<div style="padding:20px;text-align:center;color:var(--ink-40);font-size:13px">Cap notificació</div>';
+}
+function markNotifRead(id) {
+  if(!G.user) return;
+  db.ref(`gestiona/notifs/${G.user.uid}/${id}`).update({unread:false});
+}
+function markAllNotifRead() {
+  if(!G.user) return;
+  G.notifs.forEach(([id])=>db.ref(`gestiona/notifs/${G.user.uid}/${id}`).update({unread:false}));
+}
+function toggleNotifPanel() { document.getElementById('notifPanel')?.classList.toggle('hidden'); }
+
+// Tanca en clicar fora
+document.addEventListener('click',e=>{
+  if(e.target.classList.contains('modal-overlay')) e.target.classList.add('hidden');
+  if(!e.target.closest('#notifPanel')&&!e.target.closest('#notifBtn')&&!e.target.closest('#btnMobileMenu'))
+    document.getElementById('notifPanel')?.classList.add('hidden');
+});
+
+// ══════════════════════════════════════════
+//  MÒDUL: DASHBOARD
+// ══════════════════════════════════════════
+registerModule('dashboard',{
+  render: async ()=>{
+    const [aS,cS,uS,abS,cfgS] = await Promise.all([
+      db.ref('gestiona/alumnes').once('value'),
+      db.ref('gestiona/classes').once('value'),
+      db.ref('gestiona/users').once('value'),
+      db.ref(`gestiona/absencies/${today()}`).once('value'),
+      db.ref('gestiona/config/curs').once('value'),
+    ]);
+    const nA=aS.exists()?Object.keys(aS.val()).length:0;
+    const nC=cS.exists()?Object.keys(cS.val()).length:0;
+    const nU=uS.exists()?Object.keys(uS.val()).length:0;
+    const nAb=abS.exists()?Object.keys(abS.val()).length:0;
+    const curs=cfgS.exists()?cfgS.val().nom:'—';
+    const nom=(G.profile?.nom||'').split(' ')[0]||'usuari';
+    const h=new Date().getHours();
+    const salut=h<12?'Bon dia':h<19?'Bona tarda':'Bona nit';
+    const avui=new Date().toLocaleDateString('ca-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    const cards=G.activeModules.slice(0,6).map(m=>{const d=MODULES_DEF[m];return`<div class="module-card" style="cursor:pointer" onclick="navigate('${m}')"><div class="module-icon-wrap">${d.icon}</div><div class="module-info"><div class="module-name">${d.label}</div><div class="module-desc">${d.desc}</div></div></div>`;}).join('');
+    return`<div class="page-header"><div><div class="page-title">${salut}, ${nom} 👋</div><div class="page-sub">${avui.charAt(0).toUpperCase()+avui.slice(1)} · Curs ${curs}</div></div></div>
+    <div class="grid-4" style="margin-bottom:20px">
+      <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-val">${nA}</div><div class="stat-label">Alumnes</div></div>
+      <div class="stat-card"><div class="stat-icon">📚</div><div class="stat-val">${nC}</div><div class="stat-label">Classes</div></div>
+      <div class="stat-card"><div class="stat-icon">👤</div><div class="stat-val">${nU}</div><div class="stat-label">Usuaris</div></div>
+      <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-val" style="color:${nAb>0?'var(--accent)':'var(--green)'}">${nAb}</div><div class="stat-label">Absències avui</div></div>
+    </div>
+    <div class="card"><div class="card-title">Accés ràpid</div><div class="grid-3">${cards}</div></div>`;
+  },
+  bind:()=>{}
+});
+
+// ══════════════════════════════════════════
+//  MÒDUL: ADMIN
+// ══════════════════════════════════════════
+registerModule('admin',{
+  render: async ()=>{
+    const snap=await db.ref('gestiona/config').once('value');
+    const cfg=snap.exists()?snap.val():{};
+    const mods=cfg.modules||{}; const centre=cfg.centre||{}; const curs=cfg.curs||{};
+    const modCards=Object.entries(MODULES_DEF).map(([k,def])=>{
+      const isOn=mods[k]!==false;
+      return`<div class="module-card"><div class="module-icon-wrap">${def.icon}</div>
+        <div class="module-info"><div class="module-name">${def.label}</div><div class="module-desc">${def.desc}</div>
+        <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
+          <button class="toggle${isOn?' on':''}" id="modtog_${k}" onclick="toggleModule('${k}',this)"></button>
+          <span id="modstatus_${k}" style="font-size:11.5px;font-weight:600;color:${isOn?'var(--green)':'var(--ink-20)'}">${isOn?'Actiu':'Inactiu'}</span>
+        </div></div></div>`;
+    }).join('');
+    return`<div class="page-header"><div><div class="page-title">Panell Admin</div><div class="page-sub">Mòduls, centre i curs escolar</div></div></div>
+    <div class="tabs">
+      <button class="tab-btn" data-tab="tabMods">🔧 Mòduls</button>
+      <button class="tab-btn" data-tab="tabCentre">🏫 Centre</button>
+      <button class="tab-btn" data-tab="tabCurs">📅 Curs</button>
+    </div>
+    <div id="tabMods" class="tab-panel"><div class="card"><div class="card-title">Mòduls del sistema</div><div class="grid-3">${modCards}</div></div></div>
+    <div id="tabCentre" class="tab-panel hidden"><div class="card"><div class="card-title">Dades del centre</div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="cNom" value="${centre.nom||''}"></div>
+        <div class="form-group"><label class="form-label">Codi</label><input class="form-input" id="cCodi" value="${centre.codi||''}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Adreça</label><input class="form-input" id="cAdreca" value="${centre.adreca||''}"></div>
+        <div class="form-group"><label class="form-label">Telèfon</label><input class="form-input" id="cTel" value="${centre.telefon||''}"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Correu</label><input class="form-input" id="cEmail" value="${centre.email||''}"></div>
+      <button class="btn btn-primary" onclick="adminSaveCentre()">💾 Guardar centre</button>
+    </div></div>
+    <div id="tabCurs" class="tab-panel hidden"><div class="card"><div class="card-title">Curs escolar</div>
+      <div class="form-group"><label class="form-label">Nom del curs</label><input class="form-input" id="cursNom" value="${curs.nom||''}" placeholder="2024-2025"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Inici</label><input class="form-input" type="date" id="cursInici" value="${curs.inici||''}"></div>
+        <div class="form-group"><label class="form-label">Fi</label><input class="form-input" type="date" id="cursFi" value="${curs.fi||''}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Períodes</label><select class="form-select" id="cursPer"><option value="3" ${curs.periodes===3?'selected':''}>3 Trimestres</option><option value="2" ${curs.periodes===2?'selected':''}>2 Semestres</option></select></div>
+        <div class="form-group"><label class="form-label">Franges/dia</label><select class="form-select" id="cursFr">${[6,7,8].map(n=>`<option value="${n}" ${curs.franges===n?'selected':''}>${n} franges</option>`).join('')}</select></div>
+      </div>
+      <button class="btn btn-primary" onclick="adminSaveCurs()">💾 Guardar curs</button>
+    </div></div>`;
+  },
+  bind: ()=>{
+    initTabs(document.getElementById('pageContainer'));
+    window.toggleModule=async(key,btn)=>{
+      const isOn=btn.classList.toggle('on');
+      G.modules[key]=isOn;
+      const st=document.getElementById('modstatus_'+key);
+      if(st){st.textContent=isOn?'Actiu':'Inactiu';st.style.color=isOn?'var(--green)':'var(--ink-20)';}
+      await db.ref(`gestiona/config/modules/${key}`).set(isOn);
+      const cs=await db.ref('gestiona/config/centre').once('value');
+      // Recarrega mòduls i sidebar
+      await loadModules();
+      buildSidebar(cs.exists()?cs.val().nom:'');
+      showToast(`${MODULES_DEF[key]?.label} ${isOn?'activat':'desactivat'}`,isOn?'success':'');
+    };
+    window.adminSaveCentre=async()=>{
+      const centre={nom:document.getElementById('cNom').value.trim(),codi:document.getElementById('cCodi').value.trim(),adreca:document.getElementById('cAdreca').value.trim(),telefon:document.getElementById('cTel').value.trim(),email:document.getElementById('cEmail').value.trim()};
+      await db.ref('gestiona/config/centre').set(centre);
+      const el=document.getElementById('sidebarCentre'); if(el) el.textContent=centre.nom||'Gestiona';
+      showToast('Centre guardat','success');
+    };
+    window.adminSaveCurs=async()=>{
+      await db.ref('gestiona/config/curs').set({nom:document.getElementById('cursNom').value.trim(),inici:document.getElementById('cursInici').value,fi:document.getElementById('cursFi').value,periodes:parseInt(document.getElementById('cursPer').value),franges:parseInt(document.getElementById('cursFr').value)});
+      showToast('Curs guardat','success');
+    };
+  }
+});
+
+// ══════════════════════════════════════════
+//  MÒDUL: USUARIS
+// ══════════════════════════════════════════
+registerModule('usuaris',{
+  render: async ()=>{
+    const snap=await db.ref('gestiona/users').once('value');
+    const users=snap.exists()?Object.entries(snap.val()):[];
+    const roleOpts=Object.entries(ROLES_DEF).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
+    const rows=users.map(([uid,u])=>{
+      const rd=ROLES_DEF[u.rol]||{label:u.rol,color:'#999'};
+      const ini=initials(u.nom||u.email);
+      return`<tr>
+        <td><div class="td-main">${avatar(ini,rd.color)}<div><div style="font-weight:600;font-size:13.5px">${u.nom||'—'}</div><div style="font-size:11.5px;color:var(--ink-40)">${u.email}</div></div></div></td>
+        <td><span class="role-chip" style="background:${rd.color}18;color:${rd.color};border-color:${rd.color}40">${rd.label}</span></td>
+        <td style="font-size:12.5px;color:var(--ink-40)">${u.especialitat||'—'}</td>
+        <td>${badge(u.actiu?'Actiu':'Inactiu',u.actiu?'ok':'gray')}</td>
+        <td><div style="display:flex;gap:5px">
+          <button class="btn btn-xs btn-secondary" onclick="openEditUser('${uid}')">✏ Editar</button>
+          ${uid!==G.user?.uid?`<button class="btn btn-xs" style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5" onclick="toggleUserActive('${uid}',${!u.actiu})">${u.actiu?'Desactivar':'Activar'}</button>`:''}
+        </div></td>
+      </tr>`;
+    }).join('');
+    return`<div class="page-header"><div><div class="page-title">Usuaris i Rols</div></div>
+      <button class="btn btn-primary" onclick="showModal('newUserModal')">+ Nou usuari</button></div>
+    <div class="table-wrap"><table class="data-table">
+      <thead><tr><th>Usuari</th><th>Rol</th><th>Especialitat</th><th>Estat</th><th>Accions</th></tr></thead>
+      <tbody>${rows||'<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--ink-40)">Cap usuari</td></tr>'}</tbody>
+    </table></div>
+    <div id="newUserModal" class="modal-overlay hidden"><div class="modal-box">
+      <div class="modal-title">Nou usuari <button class="modal-close" onclick="hideModal('newUserModal')">✕</button></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="nuNom"></div>
+        <div class="form-group"><label class="form-label">Cognoms</label><input class="form-input" id="nuCog"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Correu *</label><input class="form-input" type="email" id="nuEmail"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Rol</label><select class="form-select" id="nuRol">${roleOpts}</select></div>
+        <div class="form-group"><label class="form-label">Contrasenya *</label><input class="form-input" type="password" id="nuPass" placeholder="Mínim 8 caràcters"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Especialitat</label><input class="form-input" id="nuEsp"></div>
+      <div id="nuError" class="login-error" style="margin-bottom:8px"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="hideModal('newUserModal')">Cancel·lar</button>
+        <button class="btn btn-primary" id="btnCU" onclick="createUser()">Crear usuari</button>
+      </div>
+    </div></div>
+    <div id="editUserModal" class="modal-overlay hidden"><div class="modal-box modal-sm">
+      <div class="modal-title">Editar usuari <button class="modal-close" onclick="hideModal('editUserModal')">✕</button></div>
+      <input type="hidden" id="euUid">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="euNom"></div>
+        <div class="form-group"><label class="form-label">Cognoms</label><input class="form-input" id="euCog"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Rol</label><select class="form-select" id="euRol">${roleOpts}</select></div>
+        <div class="form-group"><label class="form-label">Especialitat</label><input class="form-input" id="euEsp"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="hideModal('editUserModal')">Cancel·lar</button>
+        <button class="btn btn-primary" onclick="saveEditUser()">Guardar</button>
+      </div>
+    </div></div>`;
+  },
+  bind:()=>{
+    window.createUser=async()=>{
+      const nom=document.getElementById('nuNom').value.trim(),cog=document.getElementById('nuCog').value.trim(),email=document.getElementById('nuEmail').value.trim(),pass=document.getElementById('nuPass').value,rol=document.getElementById('nuRol').value,esp=document.getElementById('nuEsp').value.trim();
+      const errEl=document.getElementById('nuError');
+      const showErr=m=>{errEl.textContent=m;errEl.classList.add('show');};
+      if(!nom||!email||!pass){showErr('Omple els camps obligatoris');return;}
+      if(pass.length<8){showErr('La contrasenya ha de tenir mínim 8 caràcters');return;}
+      const btn=document.getElementById('btnCU'); btn.textContent='Creant...'; btn.disabled=true;
+      try{
+        await createUserViaRest(email,pass,{nom:`${nom} ${cog}`.trim(),rol,especialitat:esp});
+        hideModal('newUserModal'); showToast(`Usuari ${nom} creat!`,'success'); navigate('usuaris');
+      }catch(e){showErr('Error: '+e.message);btn.textContent='Crear usuari';btn.disabled=false;}
+    };
+    window.openEditUser=async(uid)=>{
+      const snap=await db.ref(`gestiona/users/${uid}`).once('value'); const u=snap.val(); if(!u) return;
+      const parts=(u.nom||'').split(' ');
+      document.getElementById('euUid').value=uid;
+      document.getElementById('euNom').value=parts[0]||'';
+      document.getElementById('euCog').value=parts.slice(1).join(' ')||'';
+      document.getElementById('euRol').value=u.rol||'professor';
+      document.getElementById('euEsp').value=u.especialitat||'';
+      showModal('editUserModal');
+    };
+    window.saveEditUser=async()=>{
+      const uid=document.getElementById('euUid').value,nom=document.getElementById('euNom').value.trim(),cog=document.getElementById('euCog').value.trim();
+      await db.ref(`gestiona/users/${uid}`).update({nom:`${nom} ${cog}`.trim(),rol:document.getElementById('euRol').value,especialitat:document.getElementById('euEsp').value.trim(),updatedAt:Date.now()});
+      hideModal('editUserModal'); showToast('Actualitzat','success'); navigate('usuaris');
+    };
+    window.toggleUserActive=async(uid,v)=>{
+      await db.ref(`gestiona/users/${uid}`).update({actiu:v}); showToast('Estat actualitzat','success'); navigate('usuaris');
+    };
+  }
+});
+
+// ══════════════════════════════════════════
+//  MÒDUL: SECRETARIA
+// ══════════════════════════════════════════
+registerModule('secretaria',{
+  render: async ()=>{
+    const [aSnap,gSnap]=await Promise.all([db.ref('gestiona/alumnes').once('value'),db.ref('gestiona/grups').once('value')]);
+    const alumnes=aSnap.exists()?Object.entries(aSnap.val()):[];
+    const grups=gSnap.exists()?Object.entries(gSnap.val()):[];
+    const gMap=Object.fromEntries(grups);
+    const gOpts='<option value="">Sense grup</option>'+grups.map(([id,g])=>`<option value="${id}">${g.nom}</option>`).join('');
+    const aRows=alumnes.map(([id,a])=>`<tr data-gid="${a.grupId||''}">
+      <td><div class="td-main">${avatar(initials(a.nom),'var(--blue)')}<div><div style="font-weight:600">${a.nom} ${a.cognoms||''}</div><div style="font-size:11px;color:var(--ink-40)">${a.email||'—'}</div></div></div></td>
+      <td>${gMap[a.grupId]?.nom||'—'}</td><td style="font-size:12.5px">${a.telefon||'—'}</td><td>${a.naix||'—'}</td>
+      <td><div style="display:flex;gap:5px">
+        <button class="btn btn-xs btn-secondary" onclick="secEdit('${id}')">✏</button>
+        <button class="btn btn-xs" style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5" onclick="secDel('${id}')">🗑</button>
+      </div></td>
+    </tr>`).join('');
+    const gRows=grups.map(([id,g])=>`<tr>
+      <td style="font-weight:600">${g.nom}</td><td>${g.curs||'—'}</td><td>${g.torn==='tarda'?'Tarda':'Matí'}</td><td>${g.numAlumnes||0}</td>
+      <td><div style="display:flex;gap:5px">
+        <button class="btn btn-xs btn-secondary" onclick="gEdit('${id}')">✏</button>
+        <button class="btn btn-xs" style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5" onclick="gDel('${id}')">🗑</button>
+      </div></td>
+    </tr>`).join('');
+    const cursOpts=['1r ESO','2n ESO','3r ESO','4t ESO','1r Batx','2n Batx','1r CFGM','2n CFGM'].map(c=>`<option>${c}</option>`).join('');
+    return`<div class="page-header"><div><div class="page-title">Secretaria</div></div></div>
+    <div class="tabs">
+      <button class="tab-btn" data-tab="secAl">👥 Alumnes (${alumnes.length})</button>
+      <button class="tab-btn" data-tab="secGr">📁 Grups (${grups.length})</button>
+      <button class="tab-btn" data-tab="secIm">📥 Importar CSV</button>
+    </div>
+    <div id="secAl" class="tab-panel">
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <input class="form-input" style="width:200px;padding:8px 12px;font-size:13px" placeholder="🔍 Cercar..." oninput="document.querySelectorAll('#aBody tr').forEach(tr=>{tr.style.display=tr.textContent.toLowerCase().includes(this.value.toLowerCase())?'':'none'})">
+        <select class="form-select" style="width:160px;padding:8px 12px;font-size:13px" onchange="document.querySelectorAll('#aBody tr').forEach(tr=>{tr.style.display=!this.value||tr.dataset.gid===this.value?'':'none'})">
+          <option value="">Tots els grups</option>${grups.map(([id,g])=>`<option value="${id}">${g.nom}</option>`).join('')}
+        </select>
+        <button class="btn btn-secondary btn-sm" onclick="showModal('newAlModal')">+ Nou alumne</button>
+        <button class="btn btn-secondary btn-sm" onclick="secExport()">⬇ Exportar CSV</button>
+      </div>
+      <div class="table-wrap"><table class="data-table">
+        <thead><tr><th>Alumne/a</th><th>Grup</th><th>Telèfon</th><th>Naix.</th><th>Accions</th></tr></thead>
+        <tbody id="aBody">${aRows||'<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--ink-40)">Cap alumne</td></tr>'}</tbody>
+      </table></div>
+    </div>
+    <div id="secGr" class="tab-panel hidden">
+      <div style="margin-bottom:14px"><button class="btn btn-secondary btn-sm" onclick="showModal('newGrModal')">+ Nou grup</button></div>
+      <div class="table-wrap"><table class="data-table">
+        <thead><tr><th>Grup</th><th>Curs</th><th>Torn</th><th>Alumnes</th><th>Accions</th></tr></thead>
+        <tbody>${gRows||'<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--ink-40)">Cap grup</td></tr>'}</tbody>
+      </table></div>
+    </div>
+    <div id="secIm" class="tab-panel hidden">
+      <div class="card">
+        <div class="card-title">Importar alumnes des de CSV</div>
+        <div class="drop-zone" id="dropZone" onclick="document.getElementById('csvInput').click()">
+          <div class="drop-icon">📊</div>
+          <div style="font-weight:600;margin-bottom:4px">Arrossega el fitxer o fes clic per seleccionar</div>
+          <div style="font-size:12px;opacity:.6">Formats: .csv</div>
+        </div>
+        <input type="file" id="csvInput" accept=".csv" style="display:none" onchange="csvHandle(this)">
+        <div id="csvPreview" style="margin-top:16px"></div>
+      </div>
+    </div>
+    <!-- MODALS -->
+    <div id="newAlModal" class="modal-overlay hidden"><div class="modal-box">
+      <div class="modal-title">Nou alumne <button class="modal-close" onclick="hideModal('newAlModal')">✕</button></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Nom *</label><input class="form-input" id="aNom"></div>
+        <div class="form-group"><label class="form-label">Cognoms</label><input class="form-input" id="aCog"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Grup</label><select class="form-select" id="aGrup">${gOpts}</select></div>
+        <div class="form-group"><label class="form-label">Data naix.</label><input class="form-input" type="date" id="aNaix"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Email família</label><input class="form-input" type="email" id="aEmail"></div>
+        <div class="form-group"><label class="form-label">Telèfon</label><input class="form-input" id="aTel"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Observacions</label><textarea class="form-textarea" id="aObs" style="min-height:60px"></textarea></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="hideModal('newAlModal')">Cancel·lar</button>
+        <button class="btn btn-primary" onclick="secCreate()">Afegir</button>
+      </div>
+    </div></div>
+    <div id="newGrModal" class="modal-overlay hidden"><div class="modal-box modal-sm">
+      <div class="modal-title">Nou grup <button class="modal-close" onclick="hideModal('newGrModal')">✕</button></div>
+      <div class="form-group"><label class="form-label">Nom *</label><input class="form-input" id="gNom" placeholder="2n ESO B"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Curs</label><select class="form-select" id="gCurs">${cursOpts}</select></div>
+        <div class="form-group"><label class="form-label">Torn</label><select class="form-select" id="gTorn"><option value="mati">Matí</option><option value="tarda">Tarda</option></select></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="hideModal('newGrModal')">Cancel·lar</button>
+        <button class="btn btn-primary" onclick="gCreate()">Crear grup</button>
+      </div>
+    </div></div>`;
+  },
+  bind:()=>{
+    initTabs(document.getElementById('pageContainer'));
+    const dz=document.getElementById('dropZone');
+    if(dz){
+      dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag-over')});
+      dz.addEventListener('dragleave',()=>dz.classList.remove('drag-over'));
+      dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag-over');const fi=document.getElementById('csvInput');if(e.dataTransfer.files[0]){const dt=new DataTransfer();dt.items.add(e.dataTransfer.files[0]);fi.files=dt.files;csvHandle(fi);}});
+    }
+    window.secCreate=async()=>{
+      const nom=document.getElementById('aNom').value.trim(); if(!nom){showToast('Introdueix el nom','error');return;}
+      await db.ref('gestiona/alumnes').push({nom,cognoms:document.getElementById('aCog').value.trim(),grupId:document.getElementById('aGrup').value,naix:document.getElementById('aNaix').value,email:document.getElementById('aEmail').value.trim(),telefon:document.getElementById('aTel').value.trim(),obs:document.getElementById('aObs').value.trim(),createdAt:Date.now(),createdBy:G.user?.uid});
+      hideModal('newAlModal'); showToast('Alumne afegit!','success'); navigate('secretaria');
+    };
+    window.secEdit=async(id)=>{
+      const snap=await db.ref(`gestiona/alumnes/${id}`).once('value'); const a=snap.val(); if(!a) return;
+      const gSnap=await db.ref('gestiona/grups').once('value');
+      const gOpts='<option value="">Sense grup</option>'+(gSnap.exists()?Object.entries(gSnap.val()).map(([gid,g])=>`<option value="${gid}" ${a.grupId===gid?'selected':''}>${g.nom}</option>`).join(''):'');
+      openDynModal('editAlModal',`<div class="modal-box"><div class="modal-title">Editar alumne <button class="modal-close" onclick="hideModal('editAlModal')">✕</button></div>
+        <div class="form-row"><div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="eaNom" value="${a.nom||''}"></div><div class="form-group"><label class="form-label">Cognoms</label><input class="form-input" id="eaCog" value="${a.cognoms||''}"></div></div>
+        <div class="form-row"><div class="form-group"><label class="form-label">Grup</label><select class="form-select" id="eaGrup">${gOpts}</select></div><div class="form-group"><label class="form-label">Data naix.</label><input class="form-input" type="date" id="eaNaix" value="${a.naix||''}"></div></div>
+        <div class="form-row"><div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="eaEmail" value="${a.email||''}"></div><div class="form-group"><label class="form-label">Telèfon</label><input class="form-input" id="eaTel" value="${a.telefon||''}"></div></div>
+        <div class="modal-actions"><button class="btn btn-secondary" onclick="hideModal('editAlModal')">Cancel·lar</button><button class="btn btn-primary" onclick="secSave('${id}')">Guardar</button></div>
+      </div>`);
+    };
+    window.secSave=async(id)=>{
+      await db.ref(`gestiona/alumnes/${id}`).update({nom:document.getElementById('eaNom').value.trim(),cognoms:document.getElementById('eaCog').value.trim(),grupId:document.getElementById('eaGrup').value,naix:document.getElementById('eaNaix').value,email:document.getElementById('eaEmail').value.trim(),telefon:document.getElementById('eaTel').value.trim(),updatedAt:Date.now()});
+      hideModal('editAlModal'); showToast('Alumne actualitzat!','success'); navigate('secretaria');
+    };
+    window.secDel=(id)=>showConfirm('Eliminar alumne','Vols eliminar aquest alumne?',async()=>{await db.ref(`gestiona/alumnes/${id}`).remove();showToast('Eliminat');navigate('secretaria');});
+    window.secExport=async()=>{
+      const [aS,gS]=await Promise.all([db.ref('gestiona/alumnes').once('value'),db.ref('gestiona/grups').once('value')]);
+      if(!aS.exists()){showToast('No hi ha alumnes','error');return;}
+      const gm=gS.exists()?gS.val():{};
+      const rows=[['Nom','Cognoms','Grup','Email','Telèfon','Naix.']];
+      Object.values(aS.val()).forEach(a=>rows.push([a.nom,a.cognoms||'',gm[a.grupId]?.nom||'',a.email||'',a.telefon||'',a.naix||'']));
+      exportCSV(rows,'alumnes.csv'); showToast('Exportat!','success');
+    };
+    window.gCreate=async()=>{
+      const nom=document.getElementById('gNom').value.trim(); if(!nom){showToast('Introdueix el nom','error');return;}
+      await db.ref('gestiona/grups').push({nom,curs:document.getElementById('gCurs').value,torn:document.getElementById('gTorn').value,numAlumnes:0,createdAt:Date.now()});
+      hideModal('newGrModal'); showToast('Grup creat!','success'); navigate('secretaria');
+    };
+    window.gEdit=async(id)=>{
+      const snap=await db.ref(`gestiona/grups/${id}`).once('value'); const g=snap.val(); if(!g) return;
+      const cursOpts=['1r ESO','2n ESO','3r ESO','4t ESO','1r Batx','2n Batx','1r CFGM','2n CFGM'].map(c=>`<option ${g.curs===c?'selected':''}>${c}</option>`).join('');
+      openDynModal('editGrModal',`<div class="modal-box modal-sm"><div class="modal-title">Editar grup <button class="modal-close" onclick="hideModal('editGrModal')">✕</button></div>
+        <div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="egNom" value="${g.nom||''}"></div>
+        <div class="form-row"><div class="form-group"><label class="form-label">Curs</label><select class="form-select" id="egCurs">${cursOpts}</select></div><div class="form-group"><label class="form-label">Torn</label><select class="form-select" id="egTorn"><option value="mati" ${g.torn==='mati'?'selected':''}>Matí</option><option value="tarda" ${g.torn==='tarda'?'selected':''}>Tarda</option></select></div></div>
+        <div class="modal-actions"><button class="btn btn-secondary" onclick="hideModal('editGrModal')">Cancel·lar</button><button class="btn btn-primary" onclick="gSave('${id}')">Guardar</button></div>
+      </div>`);
+    };
+    window.gSave=async(id)=>{await db.ref(`gestiona/grups/${id}`).update({nom:document.getElementById('egNom').value.trim(),curs:document.getElementById('egCurs').value,torn:document.getElementById('egTorn').value,updatedAt:Date.now()});hideModal('editGrModal');showToast('Grup actualitzat!','success');navigate('secretaria');};
+    window.gDel=(id)=>showConfirm('Eliminar grup','Vols eliminar aquest grup?',async()=>{await db.ref(`gestiona/grups/${id}`).remove();showToast('Eliminat');navigate('secretaria');});
+    window.csvHandle=(input)=>{
+      const file=input.files[0]; if(!file) return;
+      const reader=new FileReader();
+      reader.onload=e=>{
+        const rows=parseCSV(e.target.result);
+        if(rows.length<2){showToast('Fitxer buit','error');return;}
+        renderCSVPreview(rows);
+      };
+      reader.readAsText(file,'utf-8');
+    };
+  }
+});
+
+function parseCSV(text){
+  const rows=[];
+  const lines=text.split(/\r?\n/);
+  for(const line of lines){
+    if(!line.trim()) continue;
+    const cols=[];let cur='',inQ=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
+      else if(ch===','&&!inQ){cols.push(cur.trim());cur='';}
+      else cur+=ch;
+    }
+    cols.push(cur.trim());rows.push(cols);
+  }
+  return rows;
+}
+
+function renderCSVPreview(rows){
+  const headers=rows[0]; const dataRows=rows.slice(1).filter(r=>r.some(c=>c));
+  const fields=[{k:'nom',l:'Nom'},{k:'cognoms',l:'Cognoms'},{k:'email',l:'Email'},{k:'telefon',l:'Telèfon'},{k:'naix',l:'Data naix.'}];
+  const autoDetect=l=>headers.findIndex(h=>h.toLowerCase().includes(l.toLowerCase())||l.toLowerCase().includes(h.toLowerCase()));
+  const colOpts=(sel)=>'<option value="-1">— No importar —</option>'+headers.map((h,i)=>`<option value="${i}" ${sel===i?'selected':''}>${h}</option>`).join('');
+  const mapRows=fields.map(f=>{const a=autoDetect(f.l);return`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;align-items:center"><label style="font-size:12.5px;color:var(--ink-60);font-weight:600">${f.l}</label><select class="form-select" id="colmap_${f.k}" style="font-size:12px;padding:5px 8px">${colOpts(a)}</select></div>`;}).join('');
+  const tableRows=dataRows.map((r,i)=>`<tr id="exrow_${i}" class="selected"><td><input type="checkbox" class="row-checkbox" checked onchange="this.closest('tr').classList.toggle('selected',this.checked)"></td>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('');
+  document.getElementById('csvPreview').innerHTML=`
+    <div style="background:var(--ink-05);border-radius:var(--radius-sm);padding:16px;margin-bottom:14px">
+      <div style="font-size:13.5px;font-weight:700;margin-bottom:12px">Assigna les columnes</div>${mapRows}
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px;align-items:center">
+      <span style="font-size:13px;font-weight:600">${dataRows.length} files</span>
+      <label style="font-size:12.5px;cursor:pointer"><input type="checkbox" id="selAll" checked onchange="document.querySelectorAll('.row-checkbox').forEach(c=>{c.checked=this.checked;c.closest('tr').classList.toggle('selected',this.checked)})"> Totes</label>
+    </div>
+    <div class="excel-preview"><table class="excel-table"><thead><tr><th></th>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${tableRows}</tbody></table></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px">
+      <button class="btn btn-secondary" onclick="document.getElementById('csvPreview').innerHTML=''">Cancel·lar</button>
+      <button class="btn btn-primary" id="btnImport">⬆ Importar seleccionades</button>
+    </div>`;
+  document.getElementById('btnImport').onclick=async()=>{
+    const get=k=>parseInt(document.getElementById('colmap_'+k)?.value??-1);
+    const m={nom:get('nom'),cognoms:get('cognoms'),email:get('email'),telefon:get('telefon'),naix:get('naix')};
+    let count=0;
+    for(let i=0;i<dataRows.length;i++){
+      if(!document.getElementById(`exrow_${i}`)?.classList.contains('selected')) continue;
+      const r=dataRows[i]; const nom=m.nom>=0?r[m.nom]:''; if(!nom) continue;
+      await db.ref('gestiona/alumnes').push({nom,cognoms:m.cognoms>=0?r[m.cognoms]:'',email:m.email>=0?r[m.email]:'',telefon:m.telefon>=0?r[m.telefon]:'',naix:m.naix>=0?r[m.naix]:'',createdAt:Date.now(),createdBy:G.user?.uid});
+      count++;
+    }
+    showToast(`${count} alumnes importats!`,'success'); navigate('secretaria');
+  };
+}
+
+// ══════════════════════════════════════════
+//  MÒDULS RESTANTS (absències, llista, guardies, missatgeria, calendari, avaluacions, pagaments, indicadors, espais, perfil)
+// ══════════════════════════════════════════
+
+// ABSÈNCIES
+registerModule('absencies',{
+  render:async()=>{
+    const avui=today();
+    const [uS,abS]=await Promise.all([db.ref('gestiona/users').once('value'),db.ref(`gestiona/absencies/${avui}`).once('value')]);
+    const profs=uS.exists()?Object.entries(uS.val()).filter(([,u])=>['professor','tutor','cap_estudis','director'].includes(u.rol)&&u.actiu!==false):[];
+    const absAvui=abS.exists()?abS.val():{};
+    const dataHuman=new Date().toLocaleDateString('ca-ES',{weekday:'long',day:'numeric',month:'long'});
+    const rows=profs.map(([uid,u])=>{const ab=absAvui[uid];return`<tr>
+      <td><div class="td-main">${avatar(initials(u.nom),ab?'var(--accent)':'var(--blue)')}<div><div style="font-weight:600">${u.nom}</div><div style="font-size:11px;color:var(--ink-40)">${u.especialitat||'—'}</div></div></div></td>
+      <td>${badge(ab?'Absent':'Present',ab?'alert':'ok')}</td>
+      <td style="font-size:12.5px">${ab?.motiu||'—'}</td>
+      <td><div style="display:flex;gap:5px">
+        ${ab?`<button class="btn btn-xs btn-secondary" onclick="absPresent('${uid}','${avui}')">✓ Present</button>`
+             :`<button class="btn btn-xs" style="background:var(--accent-light);color:var(--accent-dark);border:1px solid var(--accent-light)" onclick="absObrir('${uid}')">✗ Absent</button>`}
+      </div></td>
+    </tr>`;}).join('');
+    return`<div class="page-header"><div><div class="page-title">Absències</div><div class="page-sub">${dataHuman.charAt(0).toUpperCase()+dataHuman.slice(1)}</div></div>
+      <div class="page-actions">${badge(Object.keys(absAvui).length+' absents avui',Object.keys(absAvui).length?'alert':'ok')}</div></div>
+    <div class="table-wrap"><table class="data-table">
+      <thead><tr><th>Professor/a</th><th>Estat</th><th>Motiu</th><th>Acció</th></tr></thead>
+      <tbody>${rows||'<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--ink-40)">Cap professor</td></tr>'}</tbody>
+    </table></div>
+    <div id="absModal" class="modal-overlay hidden"><div class="modal-box modal-sm">
+      <div class="modal-title">Marcar absent <button class="modal-close" onclick="hideModal('absModal')">✕</button></div>
+      <input type="hidden" id="absUid">
+      <div class="form-group"><label class="form-label">Motiu</label>
+        <select class="form-select" id="absMotiu"><option>Malaltia</option><option>Permís personal</option><option>Formació</option><option>Sense justificar</option><option>Altre</option></select></div>
+      <div class="form-group"><label class="form-label">Observacions</label><textarea class="form-textarea" id="absObs" style="min-height:70px"></textarea></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="hideModal('absModal')">Cancel·lar</button>
+        <button class="btn btn-danger" onclick="absConfirmar()">Marcar absent</button>
+      </div>
+    </div></div>`;
+  },
+  bind:()=>{
+    window.absObrir=(uid)=>{document.getElementById('absUid').value=uid;document.getElementById('absMotiu').selectedIndex=0;document.getElementById('absObs').value='';showModal('absModal');};
+    window.absConfirmar=async()=>{
+      const uid=document.getElementById('absUid').value;
+      await db.ref(`gestiona/absencies/${today()}/${uid}`).set({motiu:document.getElementById('absMotiu').value,obs:document.getElementById('absObs').value.trim(),registratPer:G.user?.uid,ts:Date.now()});
+      hideModal('absModal'); showToast('Absència registrada','success'); navigate('absencies');
+    };
+    window.absPresent=async(uid,data)=>{await db.ref(`gestiona/absencies/${data}/${uid}`).remove();showToast('Marcat present','success');navigate('absencies');};
+  }
+});
+
+// LLISTA ALUMNES
+const _ll={classeId:null,data:null,estats:{}};
+registerModule('llista',{
+  render:async()=>{
+    const cS=await db.ref('gestiona/classes').once('value');
+    const classes=cS.exists()?Object.entries(cS.val()):[];
+    return`<div class="page-header"><div><div class="page-title">Passar llista</div><div class="page-sub">Control d'assistència per classe i data</div></div></div>
+    <div class="card" style="margin-bottom:16px"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+      <div class="form-group" style="margin-bottom:0;flex:1;min-width:180px"><label class="form-label">Classe</label>
+        <select class="form-select" id="llClasse" onchange="llCarregar()"><option value="">Selecciona...</option>
+        ${classes.map(([id,c])=>`<option value="${id}">${c.nom}</option>`).join('')}</select></div>
+      <div class="form-group" style="margin-bottom:0"><label class="form-label">Data</label>
+        <input class="form-input" type="date" id="llData" value="${today()}" onchange="llCarregar()"></div>
+      <button class="btn btn-secondary btn-sm" onclick="llExportar()">⬇ Exportar</button>
+    </div></div>
+    <div id="llContainer"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Selecciona una classe</div></div></div>`;
+  },
+  bind:()=>{
+    window.llCarregar=async()=>{
+      const cid=document.getElementById('llClasse')?.value; const d=document.getElementById('llData')?.value||today();
+      const cont=document.getElementById('llContainer'); if(!cid) return;
+      cont.innerHTML=spinner();
+      const [cs,as,abs]=await Promise.all([db.ref(`gestiona/classes/${cid}`).once('value'),db.ref('gestiona/alumnes').once('value'),db.ref(`gestiona/alumnesAbsencies/${d}/${cid}`).once('value')]);
+      const c=cs.val(); const absData=abs.exists()?abs.val():{};
+      const alumnes=as.exists()?Object.entries(as.val()).filter(([,a])=>a.grupId===c?.grupId).sort(([,a],[,b])=>(a.cognoms||'').localeCompare(b.cognoms||'')):[];
+      if(!alumnes.length){cont.innerHTML='<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">Cap alumne en aquest grup</div></div>';return;}
+      _ll.classeId=cid;_ll.data=d;_ll.estats={};
+      alumnes.forEach(([id])=>{_ll.estats[id]=absData[id]||'P';});
+      const icons={P:'✓',A:'✗',R:'R',J:'J'},cls={P:'present',A:'absent',R:'retard',J:'justif'};
+      const estats=['P','A','R','J'];
+      const stats={P:0,A:0,R:0,J:0}; alumnes.forEach(([id])=>{stats[_ll.estats[id]]=(stats[_ll.estats[id]]||0)+1;});
+      const rows=alumnes.map(([id,a],i)=>{const e=_ll.estats[id];return`<div class="llista-row" id="lrow_${id}">
+        <span style="width:24px;font-size:12px;color:var(--ink-20);font-weight:600">${i+1}</span>
+        ${avatar(initials(a.nom),'var(--ink-20)')}
+        <span style="flex:1;font-size:13.5px;font-weight:500">${a.cognoms||''}, ${a.nom}</span>
+        <div style="display:flex;gap:5px">${estats.map(s=>`<button class="present-btn${e===s?' '+cls[s]:''}" onclick="llSet('${id}','${s}')" title="${{P:'Present',A:'Absent',R:'Retard',J:'Justificat'}[s]}">${icons[s]}</button>`).join('')}</div>
+      </div>`;}).join('');
+      cont.innerHTML=`<div class="grid-4" style="margin-bottom:16px">
+        <div class="stat-card" style="padding:12px;text-align:center"><div style="font-size:24px;font-weight:800;color:var(--green)" id="stP">${stats.P}</div><div style="font-size:11px;color:var(--ink-40)">Presents</div></div>
+        <div class="stat-card" style="padding:12px;text-align:center"><div style="font-size:24px;font-weight:800;color:var(--accent)" id="stA">${stats.A}</div><div style="font-size:11px;color:var(--ink-40)">Absents</div></div>
+        <div class="stat-card" style="padding:12px;text-align:center"><div style="font-size:24px;font-weight:800;color:var(--amber)" id="stR">${stats.R}</div><div style="font-size:11px;color:var(--ink-40)">Retards</div></div>
+        <div class="stat-card" style="padding:12px;text-align:center"><div style="font-size:24px;font-weight:800;color:var(--blue)" id="stJ">${stats.J}</div><div style="font-size:11px;color:var(--ink-40)">Justificats</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:2px;margin-bottom:14px">${rows}</div>
+      <button class="btn btn-primary" onclick="llGuardar()">💾 Guardar llista</button>`;
+    };
+    window.llSet=(id,e)=>{
+      _ll.estats[id]=e;
+      const row=document.getElementById('lrow_'+id); if(!row) return;
+      const cls={P:'present',A:'absent',R:'retard',J:'justif'};
+      row.querySelectorAll('.present-btn').forEach((b,i)=>{const s=['P','A','R','J'][i];b.className='present-btn'+(e===s?' '+cls[s]:'');});
+      const stats={P:0,A:0,R:0,J:0}; Object.values(_ll.estats).forEach(s=>{stats[s]=(stats[s]||0)+1;});
+      ['P','A','R','J'].forEach(s=>{const el=document.getElementById('st'+s);if(el)el.textContent=stats[s]||0;});
+    };
+    window.llGuardar=async()=>{
+      if(!_ll.classeId){showToast('Selecciona primer una classe','error');return;}
+      await db.ref(`gestiona/alumnesAbsencies/${_ll.data}/${_ll.classeId}`).set(_ll.estats);
+      showToast('Llista guardada!','success');
+    };
+    window.llExportar=async()=>{
+      if(!_ll.classeId){showToast('Carrega primer una llista','error');return;}
+      const as=await db.ref('gestiona/alumnes').once('value'); const al=as.exists()?as.val():{};
+      const labels={P:'Present',A:'Absent',R:'Retard',J:'Justificat'};
+      const rows=[['Nom','Cognoms','Estat','Data']];
+      Object.entries(_ll.estats).forEach(([id,e])=>{const a=al[id]||{};rows.push([a.nom||'',a.cognoms||'',labels[e]||e,_ll.data]);});
+      exportCSV(rows,`llista_${_ll.classeId}_${_ll.data}.csv`); showToast('Exportat!','success');
+    };
+  }
+});
+
+// GUARDIES
+registerModule('guardies',{
+  render:async()=>{
+    const avui=today();
+    const [abS,uS,cfgS,gS]=await Promise.all([db.ref(`gestiona/absencies/${avui}`).once('value'),db.ref('gestiona/users').once('value'),db.ref('gestiona/config/curs').once('value'),db.ref(`gestiona/guardies/${avui}`).once('value')]);
+    const absAvui=abS.exists()?abS.val():{};const users=uS.exists()?uS.val():{};const guard=gS.exists()?gS.val():{};
+    const profs=Object.entries(users).filter(([,u])=>['professor','tutor','cap_estudis'].includes(u.rol)&&u.actiu!==false);
+    const absents=profs.filter(([uid])=>absAvui[uid]);const disps=profs.filter(([uid])=>!absAvui[uid]);
+    const n=cfgS.exists()?(cfgS.val().franges||6):6;
+    const fHtml=Array.from({length:n},(_,i)=>{const k=`franja_${i}`,asgn=guard[k]?.uid||'',nomA=asgn&&users[asgn]?users[asgn].nom:'';
+      return`<div class="guard-slot${asgn?' ok':absents.length?' alert':' ok'}" style="margin-bottom:8px">
+        <div style="width:80px;flex-shrink:0;font-size:12.5px;font-weight:700;color:var(--ink-40)">${8+i}:00–${9+i}:00</div>
+        <select class="form-select" style="flex:1;font-size:13px;padding:7px 10px" id="guard_${i}">
+          <option value="">— Sense cobrir —</option>${disps.map(([uid,u])=>`<option value="${uid}" ${asgn===uid?'selected':''}>${u.nom}</option>`).join('')}
+        </select>
+        ${nomA?`<span style="font-size:12px;color:var(--green);font-weight:600;margin-left:8px">✓ ${nomA}</span>`:''}
+        <button class="btn btn-xs btn-secondary" style="margin-left:8px;flex-shrink:0" onclick="guardSave(${i})">💾</button>
+      </div>`;}).join('');
+    return`<div class="page-header"><div><div class="page-title">Guàrdies</div></div><div class="page-actions">${badge(absents.length+' absents','alert')}&nbsp;${badge(disps.length+' disponibles','ok')}</div></div>
+    <div class="grid-2" style="margin-bottom:20px">
+      <div class="card"><div class="card-title">Absents avui</div>${absents.length?absents.map(([uid,u])=>`<div class="guard-slot alert" style="margin-bottom:8px">${avatar(initials(u.nom),'var(--accent)')}<div style="margin-left:10px"><div style="font-weight:600">${u.nom}</div><div style="font-size:12px;color:var(--ink-40)">${absAvui[uid]?.motiu||'—'}</div></div></div>`).join(''):'<div class="empty-state" style="padding:20px"><div class="empty-icon" style="font-size:28px">✅</div><div style="font-size:13px;color:var(--ink-40)">Cap absent</div></div>'}</div>
+      <div class="card"><div class="card-title">Disponibles <span>${disps.length}</span></div>${disps.slice(0,8).map(([,u])=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--ink-05)">${avatar(initials(u.nom),'var(--green)')}<span style="font-size:13px;font-weight:500">${u.nom}</span></div>`).join('')}</div>
+    </div>
+    <div class="card"><div class="card-title">Assignació de guàrdies</div>${fHtml}
+      <div style="margin-top:14px"><button class="btn btn-primary" onclick="guardSaveAll(${n})">💾 Guardar totes</button></div>
+    </div>`;
+  },
+  bind:()=>{
+    window.guardSave=async(i)=>{const uid=document.getElementById('guard_'+i)?.value||'';await db.ref(`gestiona/guardies/${today()}/franja_${i}`).set(uid?{uid,ts:Date.now(),assignatPer:G.user?.uid}:null);showToast('Guàrdia guardada!','success');};
+    window.guardSaveAll=async(n)=>{for(let i=0;i<n;i++) await guardSave(i);showToast('Totes guardades!','success');};
+  }
+});
+
+// MISSATGERIA
+registerModule('missatgeria',{
+  render:async()=>{
+    const [mS,uS]=await Promise.all([db.ref(`gestiona/missatgeria/${G.user?.uid}`).once('value'),db.ref('gestiona/users').once('value')]);
+    const msgs=mS.exists()?Object.entries(mS.val()).sort(([,a],[,b])=>b.ts-a.ts):[];
+    const users=uS.exists()?uS.val():{};
+    const dOpts=Object.entries(users).filter(([uid])=>uid!==G.user?.uid).map(([uid,u])=>`<option value="${uid}">${u.nom}</option>`).join('');
+    const items=msgs.map(([id,m])=>{const u=users[m.enviat?m.a:m.de];return`<div class="msg-item${m.unread&&!m.enviat?' msg-unread':''}" onclick="msgObrir('${id}')">
+      <div style="display:flex;gap:8px;align-items:center">${avatar(initials(u?.nom||''),'var(--teal)')}<div style="flex:1;overflow:hidden">
+        <div style="display:flex;justify-content:space-between"><span style="font-size:13px;font-weight:${m.unread&&!m.enviat?'700':'600'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.enviat?'→ ':''} ${u?.nom||'—'}</span><span style="font-size:10.5px;color:var(--ink-20);flex-shrink:0">${new Date(m.ts).toLocaleDateString('ca-ES')}</span></div>
+        <div style="font-size:12px;color:var(--ink-40);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.assumpte||'—'}</div>
+      </div></div>
+    </div>`;}).join('');
+    return`<div class="page-header"><div><div class="page-title">Missatgeria</div></div><button class="btn btn-primary" onclick="showModal('newMsgM')">✏ Nou missatge</button></div>
+    <div style="display:flex;min-height:560px;background:var(--white);border:1px solid var(--ink-10);border-radius:var(--radius);overflow:hidden">
+      <div style="width:290px;flex-shrink:0;border-right:1px solid var(--ink-10);display:flex;flex-direction:column">
+        <div style="padding:12px 14px;border-bottom:1px solid var(--ink-10);font-size:13.5px;font-weight:700">Missatges (${msgs.length})</div>
+        <div style="overflow-y:auto;flex:1">${items||'<div style="padding:24px;text-align:center;color:var(--ink-40);font-size:13px">Cap missatge</div>'}</div>
+      </div>
+      <div id="msgPane" style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--ink-20);font-size:13.5px">Selecciona un missatge</div>
+    </div>
+    <div id="newMsgM" class="modal-overlay hidden"><div class="modal-box">
+      <div class="modal-title">Nou missatge <button class="modal-close" onclick="hideModal('newMsgM')">✕</button></div>
+      <div class="form-group"><label class="form-label">Destinatari</label><select class="form-select" id="mDest">${dOpts}</select></div>
+      <div class="form-group"><label class="form-label">Assumpte</label><input class="form-input" id="mAssump"></div>
+      <div class="form-group"><label class="form-label">Missatge</label><textarea class="form-textarea" id="mText" style="min-height:130px"></textarea></div>
+      <div class="modal-actions"><button class="btn btn-secondary" onclick="hideModal('newMsgM')">Cancel·lar</button><button class="btn btn-primary" onclick="msgEnviar()">Enviar</button></div>
+    </div></div>`;
+  },
+  bind:()=>{
+    window.msgEnviar=async()=>{
+      const dest=document.getElementById('mDest')?.value,assumpte=document.getElementById('mAssump')?.value.trim(),text=document.getElementById('mText')?.value.trim();
+      if(!text){showToast('Escriu el missatge','error');return;}
+      const msg={de:G.user.uid,a:dest,assumpte:assumpte||'(Sense assumpte)',text,ts:Date.now(),unread:true};
+      await db.ref(`gestiona/missatgeria/${dest}`).push(msg);
+      await db.ref(`gestiona/missatgeria/${G.user.uid}`).push({...msg,unread:false,enviat:true});
+      hideModal('newMsgM'); showToast('Enviat!','success'); navigate('missatgeria');
+    };
+    window.msgObrir=async(id)=>{
+      const snap=await db.ref(`gestiona/missatgeria/${G.user.uid}/${id}`).once('value'); const m=snap.val(); if(!m) return;
+      if(m.unread) await db.ref(`gestiona/missatgeria/${G.user.uid}/${id}`).update({unread:false});
+      const uS=await db.ref('gestiona/users').once('value'); const us=uS.exists()?uS.val():{};
+      const other=us[m.enviat?m.a:m.de];
+      document.getElementById('msgPane').innerHTML=`<div style="display:flex;flex-direction:column;height:100%;width:100%">
+        <div style="padding:16px 20px;border-bottom:1px solid var(--ink-10)">
+          <div style="font-size:15px;font-weight:700">${m.assumpte}</div>
+          <div style="font-size:12.5px;color:var(--ink-40);margin-top:5px">${m.enviat?'A:':'De:'} <strong>${other?.nom||'—'}</strong> · ${new Date(m.ts).toLocaleString('ca-ES')}</div>
+        </div>
+        <div style="flex:1;padding:20px;font-size:13.5px;color:var(--ink-60);line-height:1.8;white-space:pre-wrap">${m.text}</div>
+        ${!m.enviat?`<div style="padding:12px 16px;border-top:1px solid var(--ink-10);display:flex;gap:8px">
+          <input class="form-input" style="flex:1;font-size:13px;padding:9px 12px" id="replyT" placeholder="Resposta ràpida...">
+          <button class="btn btn-primary btn-sm" onclick="msgRespondre('${m.de}','${m.assumpte}')">Respondre</button>
+        </div>`:''}
+      </div>`;
+    };
+    window.msgRespondre=async(dest,assumpte)=>{const text=document.getElementById('replyT')?.value.trim();if(!text)return;const msg={de:G.user.uid,a:dest,assumpte:'Re: '+assumpte,text,ts:Date.now(),unread:true};await db.ref(`gestiona/missatgeria/${dest}`).push(msg);await db.ref(`gestiona/missatgeria/${G.user.uid}`).push({...msg,unread:false,enviat:true});showToast('Enviat!','success');navigate('missatgeria');};
+  }
+});
+
+// CALENDARI
+let _calDate=new Date();
+registerModule('calendari',{
+  render:async()=>`<div class="page-header"><div><div class="page-title">Calendari</div></div><button class="btn btn-primary" onclick="showModal('newEvM')">+ Nou event</button></div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+        <button class="btn btn-secondary btn-sm" onclick="calMes(-1)">‹ Anterior</button>
+        <span style="font-size:16px;font-weight:800" id="calLabel"></span>
+        <button class="btn btn-secondary btn-sm" onclick="calMes(1)">Següent ›</button>
+      </div>
+      <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--ink-10);border-radius:8px;overflow:hidden"></div>
+    </div>
+    <div id="newEvM" class="modal-overlay hidden"><div class="modal-box">
+      <div class="modal-title">Nou event <button class="modal-close" onclick="hideModal('newEvM')">✕</button></div>
+      <div class="form-group"><label class="form-label">Títol *</label><input class="form-input" id="evTit"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Inici</label><input class="form-input" type="date" id="evInici" value="${today()}"></div>
+        <div class="form-group"><label class="form-label">Fi</label><input class="form-input" type="date" id="evFi" value="${today()}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Hora</label><input class="form-input" type="time" id="evHora"></div>
+        <div class="form-group"><label class="form-label">Tipus</label><select class="form-select" id="evCol"><option value="accent">🔴 Reunions</option><option value="teal">🟢 Exàmens</option><option value="purple">🟣 Festius</option><option value="amber">🟡 Sortides</option><option value="blue">🔵 Activitats</option></select></div>
+      </div>
+      <div class="modal-actions"><button class="btn btn-secondary" onclick="hideModal('newEvM')">Cancel·lar</button><button class="btn btn-primary" onclick="calCrear()">Crear event</button></div>
+    </div></div>`,
+  bind:async()=>{
+    await calRender();
+    window.calMes=async(d)=>{_calDate=new Date(_calDate.getFullYear(),_calDate.getMonth()+d,1);await calRender();};
+    window.calCrear=async()=>{
+      const t=document.getElementById('evTit')?.value.trim();if(!t){showToast('Introdueix el títol','error');return;}
+      await db.ref('gestiona/events').push({titol:t,inici:document.getElementById('evInici').value,fi:document.getElementById('evFi').value,hora:document.getElementById('evHora').value,color:document.getElementById('evCol').value,createdBy:G.user?.uid,createdAt:Date.now()});
+      hideModal('newEvM');showToast('Event creat!','success');await calRender();
+    };
+  }
+});
+
+async function calRender(){
+  const months=['Gener','Febrer','Març','Abril','Maig','Juny','Juliol','Agost','Setembre','Octubre','Novembre','Desembre'];
+  const days=['Dl','Dt','Dc','Dj','Dv','Ds','Dg'];
+  const cols={accent:{bg:'#fff0f1',fg:'#e04050'},teal:{bg:'#e0faf8',fg:'#007a6e'},purple:{bg:'#f5f0ff',fg:'#5b21b6'},amber:{bg:'#fffbeb',fg:'#92400e'},blue:{bg:'#eff6ff',fg:'#1d4ed8'}};
+  const y=_calDate.getFullYear(),m=_calDate.getMonth();
+  const lbl=document.getElementById('calLabel'),grid=document.getElementById('calGrid');
+  if(!lbl||!grid) return;
+  lbl.textContent=months[m]+' '+y;
+  const evS=await db.ref('gestiona/events').once('value');
+  const events=evS.exists()?Object.values(evS.val()):[];
+  const td=new Date();
+  let html=days.map(d=>`<div style="background:var(--ink-05);padding:8px 4px;text-align:center;font-size:11px;font-weight:700;color:var(--ink-40);text-transform:uppercase">${d}</div>`).join('');
+  let start=new Date(y,m,1).getDay()-1; if(start<0) start=6;
+  for(let i=0;i<start;i++) html+=`<div style="background:var(--white);min-height:80px;padding:6px"></div>`;
+  const dim=new Date(y,m+1,0).getDate();
+  for(let d=1;d<=dim;d++){
+    const isT=td.getFullYear()===y&&td.getMonth()===m&&td.getDate()===d;
+    const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const evs=events.filter(e=>e.inici<=ds&&(!e.fi||e.fi>=ds));
+    const evH=evs.slice(0,2).map(e=>{const c=cols[e.color]||cols.accent;return`<div style="font-size:10px;padding:2px 5px;border-radius:3px;margin-top:2px;background:${c.bg};color:${c.fg};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600">${e.titol}</div>`;}).join('');
+    html+=`<div style="background:var(--white);min-height:80px;padding:6px;cursor:pointer" onmouseover="this.style.background='var(--ink-05)'" onmouseout="this.style.background='var(--white)'">
+      <div style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:${isT?'800':'600'};background:${isT?'var(--accent)':'transparent'};color:${isT?'#fff':'var(--ink)'}">${d}</div>
+      ${evH}${evs.length>2?`<div style="font-size:10px;color:var(--ink-40)">+${evs.length-2}</div>`:''}
+    </div>`;
+  }
+  grid.innerHTML=html;
+}
+
+// AVALUACIONS
+registerModule('avaluacions',{
+  render:async()=>{
+    const [cS,cfgS]=await Promise.all([db.ref('gestiona/classes').once('value'),db.ref('gestiona/config/curs').once('value')]);
+    const classes=cS.exists()?Object.entries(cS.val()):[];
+    const np=cfgS.exists()?(cfgS.val().periodes||3):3;
+    const ps=np===2?[{v:'1',l:'1r Semestre'},{v:'2',l:'2n Semestre'}]:[{v:'1',l:'1r Trimestre'},{v:'2',l:'2n Trimestre'},{v:'3',l:'3r Trimestre'}];
+    return`<div class="page-header"><div><div class="page-title">Avaluacions</div></div></div>
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:flex-end">
+      <div class="form-group" style="margin-bottom:0;min-width:200px"><label class="form-label">Classe</label>
+        <select class="form-select" id="avCl" onchange="avCarregar()"><option value="">Selecciona...</option>${classes.map(([id,c])=>`<option value="${id}">${c.nom}</option>`).join('')}</select></div>
+      <div class="form-group" style="margin-bottom:0"><label class="form-label">Període</label>
+        <select class="form-select" id="avPer" onchange="avCarregar()">${ps.map(p=>`<option value="${p.v}">${p.l}</option>`).join('')}</select></div>
+      <button class="btn btn-secondary btn-sm" onclick="avExportar()">⬇ Exportar</button>
+    </div>
+    <div id="avCont"><div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">Selecciona una classe i un període</div></div></div>`;
+  },
+  bind:()=>{
+    window.avCarregar=async()=>{
+      const cid=document.getElementById('avCl')?.value,per=document.getElementById('avPer')?.value; if(!cid) return;
+      const cont=document.getElementById('avCont'); cont.innerHTML=spinner();
+      const [cs,as,ns]=await Promise.all([db.ref(`gestiona/classes/${cid}`).once('value'),db.ref('gestiona/alumnes').once('value'),db.ref(`gestiona/notes/${cid}/${per}`).once('value')]);
+      const c=cs.val(); const notes=ns.exists()?ns.val():{};
+      const al=as.exists()?Object.entries(as.val()).filter(([,a])=>a.grupId===c?.grupId).sort(([,a],[,b])=>(a.cognoms||'').localeCompare(b.cognoms||'')):[];
+      if(!al.length){cont.innerHTML='<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">Cap alumne en aquest grup</div></div>';return;}
+      const inp=(id,k,v)=>`<input id="nota_${id}_${k}" value="${v}" style="width:52px;border:1px solid var(--ink-20);border-radius:6px;padding:5px 6px;font-size:13px;text-align:center;font-family:var(--font);outline:none" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--ink-20)'">`;
+      const rows=al.map(([id,a])=>{const n=notes[id]||{};const avg=n.ca1||n.ca2||n.ca3?((parseFloat(n.ca1||0)+parseFloat(n.ca2||0)+parseFloat(n.ca3||0))/3).toFixed(1):'—';const et=avg==='—'?'gray':parseFloat(avg)>=5?'ok':parseFloat(avg)>=3?'warn':'alert';const el=avg==='—'?'Sense nota':parseFloat(avg)>=5?'Assolit':parseFloat(avg)>=3?'Parcial':'No assolit';
+        return`<tr><td style="font-weight:600">${a.cognoms||''}, ${a.nom}</td><td>${inp(id,'ca1',n.ca1||'')}</td><td>${inp(id,'ca2',n.ca2||'')}</td><td>${inp(id,'ca3',n.ca3||'')}</td>
+        <td><select id="nota_${id}_act" style="border:1px solid var(--ink-20);border-radius:6px;padding:5px 7px;font-size:12.5px;font-family:var(--font)">${['A','B','C','D'].map(v=>`<option ${(n.act||'A')===v?'selected':''}>${v}</option>`).join('')}</select></td>
+        <td style="font-weight:800;font-size:16px">${avg}</td><td>${badge(el,et)}</td>
+        <td><button class="btn btn-xs btn-secondary" onclick="avSave('${cid}','${per}','${id}')">💾</button></td></tr>`;}).join('');
+      cont.innerHTML=`<div class="table-wrap"><table class="data-table"><thead><tr><th>Alumne/a</th><th>CA1</th><th>CA2</th><th>CA3</th><th>Actitud</th><th>Final</th><th>Estat</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+        <div style="margin-top:12px"><button class="btn btn-primary" onclick="avSaveAll('${cid}','${per}',[${al.map(([id])=>`'${id}'`).join(',')}])">💾 Guardar totes</button></div>`;
+    };
+    window.avSave=async(cid,per,id)=>{await db.ref(`gestiona/notes/${cid}/${per}/${id}`).set({ca1:document.getElementById(`nota_${id}_ca1`)?.value||'',ca2:document.getElementById(`nota_${id}_ca2`)?.value||'',ca3:document.getElementById(`nota_${id}_ca3`)?.value||'',act:document.getElementById(`nota_${id}_act`)?.value||'A',updatedAt:Date.now()});showToast('Nota guardada!','success');};
+    window.avSaveAll=async(cid,per,ids)=>{for(const id of ids) await avSave(cid,per,id);showToast('Totes guardades!','success');};
+    window.avExportar=async()=>{
+      const cid=document.getElementById('avCl')?.value,per=document.getElementById('avPer')?.value;
+      if(!cid){showToast('Selecciona una classe','error');return;}
+      const [cs,as,ns]=await Promise.all([db.ref(`gestiona/classes/${cid}`).once('value'),db.ref('gestiona/alumnes').once('value'),db.ref(`gestiona/notes/${cid}/${per}`).once('value')]);
+      const c=cs.val();const n=ns.exists()?ns.val():{};
+      const al=as.exists()?Object.entries(as.val()).filter(([,a])=>a.grupId===c?.grupId):[];
+      const rows=[['Nom','Cognoms','CA1','CA2','CA3','Actitud','Final']];
+      al.forEach(([id,a])=>{const nn=n[id]||{};const avg=nn.ca1||nn.ca2||nn.ca3?((parseFloat(nn.ca1||0)+parseFloat(nn.ca2||0)+parseFloat(nn.ca3||0))/3).toFixed(1):'';rows.push([a.nom,a.cognoms||'',nn.ca1||'',nn.ca2||'',nn.ca3||'',nn.act||'',avg]);});
+      exportCSV(rows,`notes_${cid}_t${per}.csv`);showToast('Exportat!','success');
+    };
+  }
+});
+
+// CLASSES
+registerModule('classes',{
+  render:async()=>{
+    const [cS,gS,uS]=await Promise.all([db.ref('gestiona/classes').once('value'),db.ref('gestiona/grups').once('value'),db.ref('gestiona/users').once('value')]);
+    const classes=cS.exists()?Object.entries(cS.val()):[];const grups=gS.exists()?gS.val():{};
+    const profs=uS.exists()?Object.values(uS.val()).filter(u=>['professor','tutor','cap_estudis'].includes(u.rol)):[];
+    const gOpts=Object.entries(grups).map(([id,g])=>`<option value="${id}">${g.nom}</option>`).join('');
+    const pOpts=profs.map(u=>`<option>${u.nom}</option>`).join('');
+    const cols=['var(--accent)','var(--teal)','var(--purple)','var(--amber)','var(--blue)','#ec4899'];
+    const cards=classes.map(([id,c],i)=>`<div class="card" style="border-top:3px solid ${cols[i%cols.length]}">
+      <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+        <div><div style="font-size:15px;font-weight:700">${c.nom}</div><div style="font-size:12px;color:var(--ink-40)">${grups[c.grupId]?.nom||'—'} · ${c.assignatura||'—'}</div></div>
+        <div style="display:flex;gap:4px"><button class="btn-icon" onclick="clEdit('${id}')">✏</button><button class="btn-icon" style="color:var(--accent)" onclick="clDel('${id}')">🗑</button></div>
+      </div>
+      <div style="font-size:12.5px;color:var(--ink-60);display:flex;flex-direction:column;gap:5px">
+        <span>👤 ${c.professor||'Sense professor'}</span><span>🏫 ${c.aula||'—'}</span><span>📅 ${c.horari||'—'}</span>
+      </div></div>`).join('');
+    return`<div class="page-header"><div><div class="page-title">Classes & Horaris</div></div><button class="btn btn-primary" onclick="showModal('newClM')">+ Nova classe</button></div>
+    ${classes.length?`<div class="grid-3">${cards}</div>`:'<div class="empty-state"><div class="empty-icon">📚</div><div class="empty-title">Cap classe creada</div></div>'}
+    <div id="newClM" class="modal-overlay hidden"><div class="modal-box">
+      <div class="modal-title">Nova classe <button class="modal-close" onclick="hideModal('newClM')">✕</button></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Nom *</label><input class="form-input" id="clNom"></div><div class="form-group"><label class="form-label">Assignatura</label><input class="form-input" id="clAs"></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Grup</label><select class="form-select" id="clGr"><option value="">Cap</option>${gOpts}</select></div><div class="form-group"><label class="form-label">Professor/a</label><select class="form-select" id="clPr"><option value="">Cap</option>${pOpts}</select></div></div>
+      <div class="form-group"><label class="form-label">Horari</label><input class="form-input" id="clHor" placeholder="Dl 9-10, Dc 11-12"></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Aula</label><input class="form-input" id="clAu"></div><div class="form-group"><label class="form-label">Hores/setmana</label><input class="form-input" type="number" id="clH"></div></div>
+      <div class="modal-actions"><button class="btn btn-secondary" onclick="hideModal('newClM')">Cancel·lar</button><button class="btn btn-primary" onclick="clCreate()">Crear</button>
+    </div></div></div>`;
+  },
+  bind:()=>{
+    window.clCreate=async()=>{const nom=document.getElementById('clNom').value.trim();if(!nom){showToast('Introdueix el nom','error');return;}await db.ref('gestiona/classes').push({nom,assignatura:document.getElementById('clAs').value.trim(),grupId:document.getElementById('clGr').value,professor:document.getElementById('clPr').value,horari:document.getElementById('clHor').value.trim(),aula:document.getElementById('clAu').value.trim(),hores:parseInt(document.getElementById('clH').value)||0,createdAt:Date.now(),createdBy:G.user?.uid});hideModal('newClM');showToast('Classe creada!','success');navigate('classes');};
+    window.clDel=(id)=>showConfirm('Eliminar classe','Vols eliminar?',async()=>{await db.ref(`gestiona/classes/${id}`).remove();showToast('Eliminada');navigate('classes');});
+    window.clEdit=async(id)=>{const snap=await db.ref(`gestiona/classes/${id}`).once('value');const c=snap.val();if(!c)return;const[gS,uS]=await Promise.all([db.ref('gestiona/grups').once('value'),db.ref('gestiona/users').once('value')]);const g=gS.exists()?Object.entries(gS.val()):[];const p=uS.exists()?Object.values(uS.val()).filter(u=>['professor','tutor','cap_estudis'].includes(u.rol)):[];
+    openDynModal('editClM',`<div class="modal-box"><div class="modal-title">Editar classe <button class="modal-close" onclick="hideModal('editClM')">✕</button></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="ecNom" value="${c.nom||''}"></div><div class="form-group"><label class="form-label">Assignatura</label><input class="form-input" id="ecAs" value="${c.assignatura||''}"></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Grup</label><select class="form-select" id="ecGr"><option value="">Cap</option>${g.map(([gid,gr])=>`<option value="${gid}" ${c.grupId===gid?'selected':''}>${gr.nom}</option>`).join('')}</select></div><div class="form-group"><label class="form-label">Professor</label><select class="form-select" id="ecPr"><option value="">Cap</option>${p.map(u=>`<option ${c.professor===u.nom?'selected':''}>${u.nom}</option>`).join('')}</select></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Aula</label><input class="form-input" id="ecAu" value="${c.aula||''}"></div><div class="form-group"><label class="form-label">Horari</label><input class="form-input" id="ecHor" value="${c.horari||''}"></div></div>
+      <div class="modal-actions"><button class="btn btn-secondary" onclick="hideModal('editClM')">Cancel·lar</button><button class="btn btn-primary" onclick="clUpdate('${id}')">Guardar</button></div>
+    </div>`);};
+    window.clUpdate=async(id)=>{await db.ref(`gestiona/classes/${id}`).update({nom:document.getElementById('ecNom').value.trim(),assignatura:document.getElementById('ecAs').value.trim(),grupId:document.getElementById('ecGr').value,professor:document.getElementById('ecPr').value,aula:document.getElementById('ecAu').value.trim(),horari:document.getElementById('ecHor').value.trim(),updatedAt:Date.now()});hideModal('editClM');showToast('Actualitzat!','success');navigate('classes');};
+  }
+});
+
+// PAGAMENTS
+registerModule('pagaments',{
+  render:async()=>{
+    const snap=await db.ref('gestiona/pagaments').once('value');const pags=snap.exists()?Object.entries(snap.val()):[];
+    const tot=pags.filter(([,p])=>p.estat==='pagat').reduce((s,[,p])=>s+(parseFloat(p.import)||0),0);
+    const rows=pags.map(([id,p])=>`<tr><td style="font-weight:600">${p.alumne||'—'}</td><td>${p.concepte||'—'}</td><td style="font-weight:700">${p.import||0}€</td><td style="font-size:12px;color:var(--ink-40)">${p.venciment||'—'}</td><td>${badge(p.estat,p.estat==='pagat'?'ok':p.estat==='pendent'?'warn':'alert')}</td>
+      <td><div style="display:flex;gap:5px">${p.estat!=='pagat'?`<button class="btn btn-xs" style="background:var(--green-light);color:#065f46;border:1px solid var(--green-light)" onclick="pagPagat('${id}')">✓</button>`:''}
+        <button class="btn btn-xs" style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5" onclick="pagDel('${id}')">🗑</button></div></td></tr>`).join('');
+    return`<div class="page-header"><div><div class="page-title">Pagaments</div></div><button class="btn btn-primary" onclick="showModal('newPagM')">+ Nova quota</button></div>
+    <div class="grid-4" style="margin-bottom:20px">
+      <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-val" style="font-size:22px">${tot.toFixed(0)}€</div><div class="stat-label">Recaptat</div></div>
+      <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-val" style="color:var(--green)">${pags.filter(([,p])=>p.estat==='pagat').length}</div><div class="stat-label">Pagats</div></div>
+      <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-val" style="color:var(--amber)">${pags.filter(([,p])=>p.estat==='pendent').length}</div><div class="stat-label">Pendents</div></div>
+      <div class="stat-card"><div class="stat-icon">⚠️</div><div class="stat-val" style="color:var(--accent)">${pags.filter(([,p])=>p.estat==='vençut').length}</div><div class="stat-label">Vençuts</div></div>
+    </div>
+    <div class="table-wrap"><table class="data-table"><thead><tr><th>Alumne/a</th><th>Concepte</th><th>Import</th><th>Venciment</th><th>Estat</th><th>Accions</th></tr></thead>
+    <tbody>${rows||'<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--ink-40)">Cap pagament</td></tr>'}</tbody></table></div>
+    <div id="newPagM" class="modal-overlay hidden"><div class="modal-box modal-sm">
+      <div class="modal-title">Nova quota <button class="modal-close" onclick="hideModal('newPagM')">✕</button></div>
+      <div class="form-group"><label class="form-label">Alumne/a *</label><input class="form-input" id="pAl"></div>
+      <div class="form-group"><label class="form-label">Concepte *</label><input class="form-input" id="pCon"></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Import (€)</label><input class="form-input" type="number" id="pImp" step="0.01"></div><div class="form-group"><label class="form-label">Venciment</label><input class="form-input" type="date" id="pVen"></div></div>
+      <div class="modal-actions"><button class="btn btn-secondary" onclick="hideModal('newPagM')">Cancel·lar</button><button class="btn btn-primary" onclick="pagCrear()">Crear</button></div>
+    </div></div>`;
+  },
+  bind:()=>{
+    window.pagCrear=async()=>{const al=document.getElementById('pAl').value.trim(),con=document.getElementById('pCon').value.trim();if(!al||!con){showToast('Omple els camps','error');return;}await db.ref('gestiona/pagaments').push({alumne:al,concepte:con,import:parseFloat(document.getElementById('pImp').value)||0,venciment:document.getElementById('pVen').value,estat:'pendent',createdBy:G.user?.uid,createdAt:Date.now()});hideModal('newPagM');showToast('Quota creada!','success');navigate('pagaments');};
+    window.pagPagat=async(id)=>{await db.ref(`gestiona/pagaments/${id}`).update({estat:'pagat',pagatAt:Date.now()});showToast('Pagat!','success');navigate('pagaments');};
+    window.pagDel=(id)=>showConfirm('Eliminar','Vols eliminar?',async()=>{await db.ref(`gestiona/pagaments/${id}`).remove();showToast('Eliminat');navigate('pagaments');});
+  }
+});
+
+// INDICADORS
+registerModule('indicadors',{
+  render:async()=>{
+    const [aS,cS,uS,abS,gS]=await Promise.all([db.ref('gestiona/alumnes').once('value'),db.ref('gestiona/classes').once('value'),db.ref('gestiona/users').once('value'),db.ref('gestiona/absencies').once('value'),db.ref('gestiona/grups').once('value')]);
+    const users=uS.exists()?uS.val():{};const counts={};Object.values(users).forEach(u=>{counts[u.rol]=(counts[u.rol]||0)+1;});const tot=Object.values(counts).reduce((s,n)=>s+n,0)||1;
+    const nAbs=abS.exists()?Object.values(abS.val()).reduce((s,d)=>s+Object.keys(d).length,0):0;
+    return`<div class="page-header"><div><div class="page-title">Indicadors</div></div></div>
+    <div class="grid-4" style="margin-bottom:20px">
+      <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-val">${aS.exists()?Object.keys(aS.val()).length:0}</div><div class="stat-label">Alumnes</div></div>
+      <div class="stat-card"><div class="stat-icon">📁</div><div class="stat-val">${gS.exists()?Object.keys(gS.val()).length:0}</div><div class="stat-label">Grups</div></div>
+      <div class="stat-card"><div class="stat-icon">📚</div><div class="stat-val">${cS.exists()?Object.keys(cS.val()).length:0}</div><div class="stat-label">Classes</div></div>
+      <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-val">${nAbs}</div><div class="stat-label">Absències totals</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card"><div class="card-title">Usuaris per rol</div>${Object.entries(counts).map(([rol,n])=>{const d=ROLES_DEF[rol]||{label:rol,color:'#999'};const pct=((n/tot)*100).toFixed(0);return`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--ink-05)"><span class="role-chip" style="min-width:110px;background:${d.color}18;color:${d.color};border-color:${d.color}40">${d.label}</span><div style="flex:1;height:7px;background:var(--ink-10);border-radius:99px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${d.color};border-radius:99px"></div></div><span style="font-size:13px;font-weight:700">${n}</span></div>`;}).join('')}</div>
+      <div class="card"><div class="card-title">Mòduls actius</div>${G.activeModules.map(m=>{const d=MODULES_DEF[m];return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--ink-05)"><span style="font-size:20px;width:28px">${d.icon}</span><span style="font-size:13.5px;font-weight:600;flex:1">${d.label}</span>${badge('Actiu','ok')}</div>`;}).join('')}</div>
+    </div>`;
+  },
+  bind:()=>{}
+});
+
+// ESPAIS
+registerModule('espais',{
+  render:async()=>{
+    const snap=await db.ref('gestiona/espais').once('value');const espais=snap.exists()?Object.entries(snap.val()):[];
+    const bc={lliure:'var(--green)',ocupat:'var(--accent)',reservat:'var(--amber)'};
+    const cards=espais.map(([id,e])=>`<div class="card" style="border-left:4px solid ${bc[e.estat||'lliure']}">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px"><div><div style="font-size:15px;font-weight:700">${e.nom}</div>${e.descrip?`<div style="font-size:12px;color:var(--ink-40)">${e.descrip}</div>`:''}</div><button class="btn-icon" style="color:var(--accent)" onclick="espDel('${id}')">🗑</button></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">${badge(e.estat||'lliure',e.estat==='lliure'?'ok':e.estat==='ocupat'?'alert':'warn')}${e.capacitat?`<span style="font-size:12px;color:var(--ink-40)">👥 ${e.capacitat}</span>`:''}</div>
+      <button class="btn btn-primary btn-sm w-full" onclick="espReservar('${id}')">📅 Reservar</button>
+    </div>`).join('');
+    return`<div class="page-header"><div><div class="page-title">Espais</div></div><button class="btn btn-primary" onclick="showModal('newEspM')">+ Nou espai</button></div>
+    ${espais.length?`<div class="grid-3">${cards}</div>`:'<div class="empty-state"><div class="empty-icon">🏫</div><div class="empty-title">Cap espai registrat</div></div>'}
+    <div id="newEspM" class="modal-overlay hidden"><div class="modal-box modal-sm">
+      <div class="modal-title">Nou espai <button class="modal-close" onclick="hideModal('newEspM')">✕</button></div>
+      <div class="form-group"><label class="form-label">Nom *</label><input class="form-input" id="espNom"></div>
+      <div class="form-group"><label class="form-label">Descripció</label><input class="form-input" id="espDesc"></div>
+      <div class="form-group"><label class="form-label">Capacitat</label><input class="form-input" type="number" id="espCap"></div>
+      <div class="modal-actions"><button class="btn btn-secondary" onclick="hideModal('newEspM')">Cancel·lar</button><button class="btn btn-primary" onclick="espCrear()">Crear</button></div>
+    </div></div>`;
+  },
+  bind:()=>{
+    window.espCrear=async()=>{const nom=document.getElementById('espNom').value.trim();if(!nom){showToast('Introdueix el nom','error');return;}await db.ref('gestiona/espais').push({nom,descrip:document.getElementById('espDesc').value.trim(),capacitat:parseInt(document.getElementById('espCap').value)||0,estat:'lliure',createdAt:Date.now()});hideModal('newEspM');showToast('Creat!','success');navigate('espais');};
+    window.espDel=(id)=>showConfirm('Eliminar espai','Vols eliminar?',async()=>{await db.ref(`gestiona/espais/${id}`).remove();showToast('Eliminat');navigate('espais');});
+    window.espReservar=(id)=>openDynModal('resM',`<div class="modal-box modal-sm"><div class="modal-title">Reservar <button class="modal-close" onclick="hideModal('resM')">✕</button></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Data</label><input class="form-input" type="date" id="resD" value="${today()}"></div><div class="form-group"><label class="form-label">Hora inici</label><input class="form-input" type="time" id="resHi" value="09:00"></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Hora fi</label><input class="form-input" type="time" id="resHf" value="10:00"></div><div class="form-group"><label class="form-label">Motiu</label><input class="form-input" id="resMo"></div></div>
+      <div class="modal-actions"><button class="btn btn-secondary" onclick="hideModal('resM')">Cancel·lar</button><button class="btn btn-primary" onclick="espConfReserva('${id}')">Reservar</button></div>
+    </div>`);
+    window.espConfReserva=async(id)=>{await db.ref(`gestiona/reserves/${id}`).push({data:document.getElementById('resD').value,horaI:document.getElementById('resHi').value,horaF:document.getElementById('resHf').value,motiu:document.getElementById('resMo').value,reservatPer:G.user?.uid,createdAt:Date.now()});await db.ref(`gestiona/espais/${id}`).update({estat:'reservat'});hideModal('resM');showToast('Reserva creada!','success');navigate('espais');};
+  }
+});
+
+// PERFIL
+registerModule('perfil',{
+  render:async()=>{
+    const u=G.profile||{};const rd=ROLES_DEF[u.rol]||{label:u.rol||'—',color:'#999'};
+    const nom=u.nom||'';const parts=nom.split(' ');
+    return`<div class="page-header"><div><div class="page-title">El meu perfil</div></div></div>
+    <div class="grid-2">
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--ink-05)">
+          ${avatar(initials(nom),rd.color,'lg')}
+          <div><div style="font-size:17px;font-weight:700">${nom||'—'}</div>
+            <span class="role-chip" style="margin-top:5px;display:inline-block;background:${rd.color}18;color:${rd.color};border-color:${rd.color}40">${rd.label}</span>
+            <div style="font-size:12px;color:var(--ink-40);margin-top:4px">${G.user?.email||'—'}</div>
+          </div>
+        </div>
+        <div class="form-row"><div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="pNom" value="${parts[0]||''}"></div><div class="form-group"><label class="form-label">Cognoms</label><input class="form-input" id="pCog" value="${parts.slice(1).join(' ')||''}"></div></div>
+        <div class="form-group"><label class="form-label">Especialitat</label><input class="form-input" id="pEsp" value="${u.especialitat||''}"></div>
+        <button class="btn btn-primary" onclick="perfilSave()">💾 Guardar</button>
+      </div>
+      <div class="card"><div class="card-title">Sessió</div>
+        <button class="btn btn-secondary w-full" style="margin-bottom:10px" onclick="showModal('resetModal')">🔑 Canviar contrasenya</button>
+        <button class="btn btn-secondary w-full" style="border-color:#fca5a5;color:#991b1b" onclick="doLogout()">↩ Tancar sessió</button>
+      </div>
+    </div>`;
+  },
+  bind:()=>{
+    window.perfilSave=async()=>{
+      const n=document.getElementById('pNom').value.trim(),c=document.getElementById('pCog').value.trim(),nomC=`${n} ${c}`.trim();
+      await db.ref(`gestiona/users/${G.user?.uid}`).update({nom:nomC,especialitat:document.getElementById('pEsp').value.trim(),updatedAt:Date.now()});
+      if(G.profile) G.profile.nom=nomC;
+      const el=document.getElementById('uName');if(el) el.textContent=nomC;
+      showToast('Perfil actualitzat!','success');
+    };
+  }
+});
+
+console.log('🌿 Gestiona v3.0 — Autocontingut, funciona amb file:// i qualsevol servidor');
 </script>
 </body>
 </html>
